@@ -296,7 +296,7 @@
       <div class="lockup grande"><span class="nome">Finanze di Famiglia</span><span class="marchio">&gt;</span></div>
       <h1 class="spazio">Le spese di famiglia,<br />senza il lavoro di segnarle.</h1>
       <p class="lead">Una webapp che mostra dove vanno i soldi. E uno scontrino
-        che, fotografato, si registra quasi da solo.</p>
+        che, fotografato, si registra da solo — senza digitare niente.</p>
       <div class="spazio-lg"><span class="chip">Per Sara &amp; Marco — un conto familiare, due modi di riempirlo</span></div>
     </div>
   </section>
@@ -344,10 +344,11 @@
         </div>
         <div class="scheda evidenza">
           <div class="num">Dallo scontrino · per ogni singola spesa</div>
-          <div class="cifra">1 <span class="cifra-eti">foto + 1 conferma</span></div>
-          <p class="spazio">La foto porta con sé importo, data e — quasi sempre —
-             anche la categoria. Alla persona resta un gesto: dire «sì».</p>
-          <span class="prova">Prova: <code>bot/bot.js</code> · <code>importa-telegram.html</code></span>
+          <div class="cifra">1 <span class="cifra-eti">foto, zero da digitare</span></div>
+          <p class="spazio">La foto al bot Telegram porta con sé importo, data e
+             categoria. Claude la legge e il movimento <strong>si registra da
+             solo</strong>: alla persona non resta nessun campo da compilare.</p>
+          <span class="prova">Prova: <code>bot/bot.js</code> · <code>telegram-autoimport.js</code></span>
         </div>
       </div>
     </div>
@@ -373,10 +374,12 @@
         </div>
         <div class="scheda evidenza">
           <div class="num">Pilastro 2 — dallo scontrino, con Claude</div>
-          <h3>foto › Claude Vision › conferma › movimento</h3>
-          <p>Una foto al bot Telegram. <strong>Claude Opus (Vision)</strong> legge
-             importo, data e categoria e propone il movimento. Tu apri la webapp,
-             controlli e confermi: <strong>solo allora</strong> entra nei tuoi conti.</p>
+          <h3>foto › Claude Vision › movimento</h3>
+          <p>Una foto al bot Telegram. <strong>Claude (Vision)</strong>, via il CLI
+             <code>claude</code> locale — <strong>nessuna API key</strong> — legge
+             importo, data e categoria. Con la webapp aperta il movimento
+             <strong>si registra da solo</strong> e la dashboard si aggiorna; una
+             soglia di fiducia tiene le letture incerte alla revisione.</p>
           <div class="fase-mock spazio" aria-hidden="true">
             <div class="barra-top"></div>
             <div class="riga"></div><div class="riga forte corta"></div><div class="riga"></div>
@@ -438,18 +441,18 @@
           <div class="num">Parte B — con Claude</div>
           <ul class="punti">
             <li>Foto di uno scontrino al bot Telegram.</li>
-            <li>Sulla home appare «scontrini pronti da importare».</li>
-            <li>Apro, controllo la proposta di Claude, <strong>confermo</strong>.</li>
-            <li>Diventa un movimento; la dashboard cambia di nuovo.</li>
+            <li>Claude lo legge: importo, data, categoria.</li>
+            <li>Con la webapp aperta, il movimento <strong>si registra da solo</strong> — un toast lo annuncia.</li>
+            <li>La dashboard cambia di nuovo, senza toccare la tastiera.</li>
           </ul>
         </div>
       </div>
       <div class="dichiarazione spazio">
         <h3>Il confine, senza sorprese</h3>
-        <p>La <strong>Parte A gira 100% offline</strong>. La <strong>Parte B richiede
-           il bot</strong> (<code>localhost:3001</code>) e la rete verso Claude. Per
-           sicurezza in sala, la coda scontrini è pre-seedata: la conferma → dashboard
-           si vede anche se la rete manca.</p>
+        <p>La <strong>Parte A gira 100% offline</strong>. La <strong>Parte B live</strong>
+           richiede il bot (<code>localhost:3001</code>), il CLI <code>claude</code>
+           loggato e la rete per l'inferenza. Per sicurezza in sala la coda scontrini è
+           pre-seedata: l'<strong>import → dashboard</strong> si vede anche senza rete.</p>
       </div>
     </div>
   </section>
@@ -465,8 +468,8 @@
           <div class="num">Funziona adesso</div>
           <ul class="punti">
             <li><strong>Il flusso completo gira</strong> — login, conti, movimenti categorizzati, dashboard.<span class="prova"><code>ui-output_…_md3/</code></span></li>
-            <li><strong>Claude legge lo scontrino</strong> e propone un movimento.<span class="prova"><code>bot/bot.js</code> · modello claude-opus-5</span></li>
-            <li><strong>La conferma precede la scrittura.</strong><span class="prova"><code>importa-telegram.html</code> · coda <code>/pending</code></span></li>
+            <li><strong>Claude legge lo scontrino</strong> — importo, data, categoria — via il CLI locale, senza API key.<span class="prova"><code>bot/bot.js</code> · Claude Sonnet</span></li>
+            <li><strong>Il movimento entra da solo</strong> nei conti; una soglia di fiducia trattiene le letture incerte.<span class="prova"><code>telegram-autoimport.js</code> · <code>importa-telegram.html</code></span></li>
             <li><strong>La dashboard aggrega</strong> per categoria e periodo.<span class="prova"><code>dashboard.html</code></span></li>
           </ul>
         </div>
@@ -476,7 +479,7 @@
           <ul class="punti no">
             <li><strong>Il login è un gate client-side</strong>, non sicurezza reale — perché è tutto frontend, senza backend.</li>
             <li><strong>I dati vivono in un solo browser</strong> — perché stanno in <code>localStorage</code>, senza persistenza condivisa.</li>
-            <li><strong>L'import richiede rete e una API key</strong> — perché l'inferenza Vision non è locale.</li>
+            <li><strong>L'import live richiede rete e il CLI <code>claude</code> loggato</strong> — perché l'inferenza Vision gira via Claude Code, non nel browser.</li>
           </ul>
         </div>
         <!-- PROSSIMI PASSI — futuro, ordine di dipendenza, nessuna data -->
@@ -485,7 +488,7 @@
           <ul class="punti">
             <li><strong>Porteremo i dati oltre il browser.</strong> Oggi vivono in <code>localStorage</code>; una persistenza condivisa viene prima, perché tutto il resto ne dipende.</li>
             <li><strong>Poi un accesso reale.</strong> Dipende dalla persistenza: senza dati fuori dal browser, un login vero non protegge nulla.</li>
-            <li><strong>Infine, la categoria imparata.</strong> Oggi ogni conferma corregge Claude una volta; domani quella correzione affinerà la proposta.</li>
+            <li><strong>Infine, la categoria che impara.</strong> Oggi arriva da uno schema vincolato alle categorie della webapp; domani le correzioni manuali affineranno la proposta.</li>
           </ul>
         </div>
       </div>
