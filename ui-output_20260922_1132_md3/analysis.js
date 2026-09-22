@@ -14,6 +14,7 @@
 
 // Soglie (documentate qui così sono spiegabili a voce).
 var CRESCITA_MIN_PCT = 0.20;      // +20% mese-su-mese per segnalare una crescita
+var CALO_MIN_PCT = 0.20;          // -20% mese-su-mese per segnalare un calo virtuoso
 var CRESCITA_MIN_IMPORTO = 20;    // ignora micro-importi
 var ANOMALIA_FATTORE = 1.5;       // >= 1.5x la media dei mesi precedenti
 var ANOMALIA_MIN_IMPORTO = 20;
@@ -124,6 +125,19 @@ function analizza(opts) {
   });
   categorieInCrescita.sort(function (a, b) { return b.deltaPct - a.deltaPct; });
 
+  // ── Categorie in calo (comportamento virtuoso): mese corrente < mese precedente ──
+  var categorieInCalo = [];
+  prevMonthCat.forEach(function (prev, cat) {
+    var curr = currMonthCat.get(cat) || 0;
+    if (prev > 0 && curr < prev) {
+      var deltaPct = (prev - curr) / prev;
+      if (deltaPct >= CALO_MIN_PCT && prev >= CRESCITA_MIN_IMPORTO) {
+        categorieInCalo.push({ categoria: cat, corrente: _round2(curr), precedente: _round2(prev), deltaPct: _round2(deltaPct) });
+      }
+    }
+  });
+  categorieInCalo.sort(function (a, b) { return b.deltaPct - a.deltaPct; });
+
   // ── Anomalie: mese corrente molto sopra la media dei mesi precedenti ──
   var anomalie = [];
   currMonthCat.forEach(function (curr, cat) {
@@ -145,7 +159,8 @@ function analizza(opts) {
   var metriche = {
     entrate: entrate, uscite: uscite, netto: netto, tassoRisparmio: tassoRisparmio,
     saldoTotale: saldoTotale, topCategoria: topCategoria,
-    categorieInCrescita: categorieInCrescita, anomalie: anomalie, periodo: periodo
+    categorieInCrescita: categorieInCrescita, categorieInCalo: categorieInCalo,
+    anomalie: anomalie, periodo: periodo
   };
   metriche.insights = costruisciInsights(metriche);
   return metriche;
@@ -164,11 +179,25 @@ function costruisciInsights(m) {
         '): stai erodendo il saldo di ' + _fmt(Math.abs(m.netto)) + '.'
     });
   } else if (m.netto > 0) {
-    var quota = (m.tassoRisparmio != null) ? ' (' + _pct(m.tassoRisparmio) + '% delle entrate)' : '';
+    var quota = (m.tassoRisparmio != null) ? _pct(m.tassoRisparmio) : null;
+    // Complimento in evidenza; più caloroso se il tasso di risparmio è alto.
+    var lode = (quota != null && quota >= 20) ? 'Complimenti, ottimo risultato!' : 'Bravi, complimenti!';
+    var quotaTxt = (quota != null) ? ' (' + quota + '% delle entrate messo da parte)' : '';
     out.push({
-      code: 'risparmio', level: 'positive', icon: 'savings',
-      title: 'Stai risparmiando',
-      detail: 'Nel periodo metti da parte ' + _fmt(m.netto) + quota + '.'
+      code: 'risparmio', level: 'positive', icon: 'celebration',
+      title: lode + ' Stai risparmiando',
+      detail: 'Nel periodo le entrate superano le uscite: hai messo da parte ' + _fmt(m.netto) + quotaTxt + '. Continua così!'
+    });
+  }
+
+  // Comportamento virtuoso: una categoria di spesa in calo rispetto al mese scorso.
+  if (m.categorieInCalo && m.categorieInCalo.length > 0) {
+    var giu = m.categorieInCalo[0];
+    out.push({
+      code: 'categoria_calo', level: 'positive', icon: 'trending_down',
+      title: 'Bravi: spese in calo per ' + giu.categoria,
+      detail: giu.categoria + ' scende a ' + _fmt(giu.corrente) + ' questo mese, -' + _pct(giu.deltaPct) +
+        '% rispetto a ' + _fmt(giu.precedente) + ' del mese scorso.'
     });
   }
 

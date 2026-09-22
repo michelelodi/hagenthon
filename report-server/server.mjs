@@ -59,6 +59,8 @@ const SYSTEM = [
   'Scrivi in italiano, con tono chiaro, concreto e non giudicante.',
   'NON fornire consulenza finanziaria o professionale personalizzata: descrivi ciò che',
   'emerge dai dati e offri al massimo suggerimenti pratici di buon senso.',
+  'Riconosci ed evidenzia i comportamenti virtuosi (mese in risparmio, spese in calo)',
+  'con un complimento sincero, non solo i problemi.',
   'Massimo ~130 parole. Struttura: 2-4 osservazioni chiave (puntate) + 1 suggerimento finale.',
   'Non inventare numeri: usa solo quelli forniti.'
 ].join(' ');
@@ -81,6 +83,11 @@ function costruisciPrompt(a) {
   if (Array.isArray(a.categorieInCrescita) && a.categorieInCrescita.length) {
     righe.push('Categorie in aumento rispetto al mese scorso: ' + a.categorieInCrescita.slice(0, 3).map(function (c) {
       return c.categoria + ' (+' + Math.round(c.deltaPct * 100) + '%, da ' + euro(c.precedente) + ' a ' + euro(c.corrente) + ')';
+    }).join('; ') + '.');
+  }
+  if (Array.isArray(a.categorieInCalo) && a.categorieInCalo.length) {
+    righe.push('Comportamenti virtuosi — categorie in calo rispetto al mese scorso: ' + a.categorieInCalo.slice(0, 3).map(function (c) {
+      return c.categoria + ' (-' + Math.round(c.deltaPct * 100) + '%, da ' + euro(c.precedente) + ' a ' + euro(c.corrente) + ')';
     }).join('; ') + '.');
   }
   if (Array.isArray(a.anomalie) && a.anomalie.length) {

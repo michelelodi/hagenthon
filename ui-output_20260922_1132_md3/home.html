@@ -189,6 +189,88 @@
       color: var(--md-primary);
     }
 
+    /* ── Tutti i movimenti (merge di tutti i conti) ── */
+    .all-movements {
+      margin-top: var(--spacing-lg);
+    }
+
+    .all-movements__title {
+      font-family: var(--font);
+      font-weight: 500;
+      font-size: 16px;
+      color: var(--md-on-surface);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .movements-list {
+      list-style: none;
+      background: var(--md-surface);
+      border-radius: var(--shape-md);
+      box-shadow: var(--elevation-1);
+      overflow: hidden;
+    }
+
+    .mv-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-bottom: 1px solid var(--md-outline-variant);
+      text-decoration: none;
+      color: inherit;
+    }
+    .mv-item:last-child { border-bottom: none; }
+    .mv-item:hover { background: color-mix(in srgb, var(--md-primary) 5%, transparent); }
+
+    .mv-item__body { flex: 1; min-width: 0; }
+
+    .mv-item__row1 {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+
+    .mv-item__cat {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-on-surface);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mv-item__conto {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--md-on-primary-container);
+      background: var(--md-primary-container);
+      border-radius: var(--shape-full);
+      padding: 1px 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .mv-item__meta {
+      font-size: 12px;
+      color: var(--md-on-surface-variant);
+      margin-top: 2px;
+    }
+
+    .mv-item__amount {
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .mv-item__amount--entrata { color: var(--md-success); }
+    .mv-item__amount--uscita { color: var(--md-error); }
+
+    .all-movements__empty {
+      font-size: 14px;
+      color: var(--md-on-surface-variant);
+      padding: var(--spacing-md);
+    }
+
     /* ── MD3 Navigation Bar (fixed bottom) ── */
     .nav-bar {
       background: var(--md-surface);
@@ -361,6 +443,12 @@
       </a>
 
       <div class="account-cards" id="account-cards"><!-- popolato da JS --></div>
+
+      <!-- Tutti i movimenti (unione di tutti i conti) -->
+      <section class="all-movements" aria-label="Tutti i movimenti">
+        <h2 class="all-movements__title">Tutti i movimenti</h2>
+        <ul class="movements-list" id="all-movements"><!-- popolato da JS --></ul>
+      </section>
     </main>
 
   </div>
@@ -412,7 +500,45 @@
           '</a>';
       }).join('');
     }
+    // ── Tutti i movimenti uniti, con il conto di riferimento ──
+    function renderMovimenti() {
+      var conti = getConti();
+      var nomeById = {};
+      conti.forEach(function (c) { nomeById[c.id] = c.nome; });
+
+      var movimenti = getMovimenti().slice().sort(function (a, b) {
+        if (a.data !== b.data) return a.data < b.data ? 1 : -1;
+        return (a.createdAt || '') < (b.createdAt || '') ? 1 : -1;
+      });
+
+      var list = document.getElementById('all-movements');
+      if (movimenti.length === 0) {
+        list.innerHTML = '<li class="all-movements__empty">Nessun movimento ancora.</li>';
+        return;
+      }
+
+      list.innerHTML = movimenti.map(function (m) {
+        var isEntrata = m.tipo === 'entrata';
+        var segno = isEntrata ? '+' : '-';
+        var cat = escHtml(m.categoria || 'Altro');
+        var desc = m.descrizione ? ' · ' + escHtml(m.descrizione) : '';
+        var conto = escHtml(nomeById[m.contoId] || 'Conto');
+        return '' +
+          '<a class="mv-item" href="dettaglio-conto.html?id=' + encodeURIComponent(m.contoId) + '">' +
+            '<div class="mv-item__body">' +
+              '<div class="mv-item__row1">' +
+                '<span class="mv-item__cat">' + cat + '</span>' +
+                '<span class="mv-item__conto">' + conto + '</span>' +
+              '</div>' +
+              '<div class="mv-item__meta">' + formatData(m.data) + desc + '</div>' +
+            '</div>' +
+            '<span class="mv-item__amount mv-item__amount--' + (isEntrata ? 'entrata' : 'uscita') + '">' +
+              segno + ' ' + formatEuro(m.importo) + '</span>' +
+          '</a>';
+      }).join('');
+    }
     renderConti();
+    renderMovimenti();
 
     async function checkTelegramPending() {
       try {
@@ -434,8 +560,8 @@
     checkTelegramPending();
     setInterval(checkTelegramPending, 15000);
 
-    // Auto-import Telegram: ridisegna i conti quando arriva un nuovo movimento.
-    window.addEventListener('telegram:imported', renderConti);
+    // Auto-import Telegram: ridisegna conti e movimenti quando arriva un nuovo movimento.
+    window.addEventListener('telegram:imported', function () { renderConti(); renderMovimenti(); });
   </script>
 
   <!-- Auto-import degli scontrini letti dal bot Telegram (registra in localStorage senza click). -->
