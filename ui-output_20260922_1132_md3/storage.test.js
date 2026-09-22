@@ -110,6 +110,16 @@ test('seedDemo is idempotent-ish: does not double seed when conti exist', () => 
   assert.equal(S.getConti().length, n);
 });
 
+test('migraConti rinomina un conto in-place senza perdere i movimenti', () => {
+  const c = S.createConto({ nome: 'Carta di Credito', saldoIniziale: 100 });
+  S.createMovimento({ contoId: c.id, tipo: 'uscita', importo: 10, data: '2026-09-01', categoria: 'Spesa' });
+  S.migraConti();
+  const conto = S.getConto(c.id);
+  assert.equal(conto.nome, 'Conto Corrente Business');
+  assert.equal(conto.id, c.id, 'stesso id');
+  assert.equal(S.getMovimenti(c.id).length, 1, 'movimenti preservati');
+});
+
 test('clearAll empties everything', () => {
   S.seedDemo();
   S.clearAll();
