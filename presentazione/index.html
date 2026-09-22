@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Finanze di Famiglia &gt; — Hagenthon</title>
+<style>
+  /* ═══════════════════════════════════════════════════════════════════
+     Palette Accenture — unica dichiarazione dei colori del brand.
+     Fuori da questo blocco NON compaiono esadecimali: tutto via var().
+     Font: Graphik non è disponibile in locale → Arial, il sostituto
+     previsto dalle guidelines. GT Sectra Fine non ha sostituto indicato
+     → pila serif di sistema, dichiarata come non-brand.
+     ═══════════════════════════════════════════════════════════════════ */
+  :root {
+    /* Scala viola */
+    --acn-viola-scuro:  #460073;
+    --acn-viola-medio:  #7500C0;
+    --acn-viola:        #A100FF;  /* core */
+    --acn-viola-chiaro: #C2A3FF;
+    --acn-viola-tenue:  #E6DCFF;
+    /* Neutri */
+    --acn-nero:         #000000;
+    --acn-grigio:       #818180;
+    --acn-grigio-chiaro:#CFCFCF;
+    --acn-nebbia:       #F1F1EF;
+    --acn-bianco:       #FFFFFF;
+    /* Secondari — solo infografiche, con parsimonia */
+    --acn-rosa:  #FF50A0;
+    --acn-blu:   #224BFF;
+    --acn-acqua: #05F2DB;  /* mai in light mode */
+    /* Tipografia */
+    --acn-sans:  Graphik, Arial, Helvetica, sans-serif;
+    --acn-serif: "GT Sectra Fine", Georgia, "Times New Roman", serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  /* Light mode: il default del brand. */
+  body {
+    background: var(--acn-bianco);
+    color: var(--acn-nero);
+    font-family: var(--acn-sans);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  main { scroll-snap-type: y proximity; }
+
+  /* ── Slide: una per schermata ── */
+  .slide {
+    min-height: 100vh;
+    padding: 5.5vh 7vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    scroll-snap-align: start;
+    position: relative;
+    border-bottom: 1px solid var(--acn-nebbia);
+  }
+  .interno { width: 100%; max-width: 1140px; margin: 0 auto; }
+
+  /* ── Tipografia: il peso fa la gerarchia ── */
+  .eyebrow {
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--acn-viola-medio);   /* 8,34:1 su bianco */
+    margin-bottom: 1.1rem;
+  }
+  h1 {
+    font-size: clamp(2.5rem, 6.2vw, 4.8rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.02;
+    color: var(--acn-nero);
+  }
+  h2 {
+    font-size: clamp(1.7rem, 3.6vw, 2.8rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--acn-viola-scuro);   /* 13,93:1 su bianco */
+    max-width: 22ch;
+  }
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--acn-nero);
+  }
+  p {
+    font-size: clamp(1rem, 1.35vw, 1.2rem);
+    font-weight: 400;
+    max-width: 60ch;
+    color: var(--acn-nero);
+  }
+  p.lead { font-size: clamp(1.15rem, 1.7vw, 1.5rem); margin-top: 1.1rem; }
+  .muto { color: var(--acn-viola-scuro); }
+  strong { font-weight: 600; }
+
+  .spazio { margin-top: 1.6rem; }
+  .spazio-lg { margin-top: 2.4rem; }
+
+  /* ── Cifre grandi (display → il core è ammesso) ── */
+  .cifra {
+    font-size: clamp(2.6rem, 7vw, 5rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--acn-viola);         /* core: solo su testo grande */
+    font-variant-numeric: tabular-nums;
+  }
+  .cifra-eti { font-size: clamp(1rem, 1.5vw, 1.25rem); font-weight: 500; color: var(--acn-nero); }
+
+  /* ── Griglie ── */
+  .griglia { display: grid; gap: 1.4rem; margin-top: 2rem; }
+  .g2 { grid-template-columns: 1fr 1fr; }
+  .g3 { grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 860px) { .g2, .g3 { grid-template-columns: 1fr; } }
+
+  /* ── Schede ── */
+  .scheda {
+    background: var(--acn-nebbia);
+    border: 1px solid var(--acn-grigio-chiaro);
+    border-radius: 14px;
+    padding: 1.5rem 1.6rem;
+  }
+  .scheda.evidenza {
+    background: var(--acn-viola-tenue);
+    border-color: var(--acn-viola-chiaro);
+  }
+  .num {
+    font-weight: 600;
+    font-size: 0.74rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--acn-viola-medio);
+    margin-bottom: 0.9rem;
+  }
+  .scheda h3 { margin-bottom: 0.5rem; }
+  .scheda p { font-size: 0.98rem; color: var(--acn-nero); }
+
+  /* Elenchi */
+  .punti { list-style: none; display: grid; gap: 0.75rem; }
+  .punti li { position: relative; padding-left: 1.4rem; font-size: 0.98rem; }
+  .punti li::before {
+    content: "›"; position: absolute; left: 0; top: -0.05em;
+    color: var(--acn-viola-medio); font-weight: 600; font-size: 1.15rem;
+  }
+  .punti.no li::before { content: "×"; color: var(--acn-viola-scuro); }
+  .prova { display: block; margin-top: 0.25rem; font-size: 0.8rem; color: var(--acn-viola-scuro); }
+  code {
+    font-family: "SF Mono", "Cascadia Mono", Consolas, monospace;
+    font-size: 0.82em;
+    color: var(--acn-viola-scuro);   /* 13,93:1 su bianco */
+    background: var(--acn-nebbia);
+    padding: 0.05em 0.35em;
+    border-radius: 4px;
+  }
+
+  /* ── Call-out: l'unico posto per il serif ── */
+  blockquote {
+    font-family: var(--acn-serif);
+    font-size: clamp(1.3rem, 2.7vw, 2.05rem);
+    line-height: 1.32;
+    color: var(--acn-viola-scuro);
+    border-left: 4px solid var(--acn-viola);
+    padding-left: 1.6rem;
+    max-width: 46ch;
+    margin-top: 1.8rem;
+  }
+  blockquote .fonte {
+    display: block; margin-top: 0.9rem;
+    font-family: var(--acn-sans); font-size: 0.85rem; font-weight: 500;
+    color: var(--acn-nero); font-style: normal;
+  }
+
+  /* ── Lockup di prodotto ── */
+  /* Il logo Accenture NON è riprodotto (asset assente). Qui c'è il nome
+     del PRODOTTO + il Greater Than come elemento grafico, pieno e intero. */
+  .lockup { display: inline-flex; align-items: baseline; gap: 0.35rem; }
+  .lockup .nome { font-weight: 600; font-size: 1.15rem; letter-spacing: -0.01em; color: var(--acn-nero); }
+  /* Il core sul '>' resta su testo grande (≥24px): conforme alla soglia. */
+  .lockup .marchio { color: var(--acn-viola); font-weight: 600; font-size: 1.6rem; line-height: 1; }
+  .lockup.grande .nome { font-size: clamp(1.4rem, 2.4vw, 2rem); }
+  .lockup.grande .marchio { font-size: clamp(1.7rem, 3vw, 2.5rem); }
+
+  /* Attribuzione: NON è un marchio. Tonda, minuscola dopo l'iniziale,
+     neutro scuro, letter-spacing normale, nessun maiuscolo. */
+  .attrib {
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 400;
+    font-size: 0.9rem;
+    color: var(--acn-nero);
+  }
+  .attrib .org { font-weight: 600; }
+
+  /* ── Header / footer di slide ── */
+  .top-nota {
+    position: absolute; top: 3.5vh; left: 7vw; right: 7vw;
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 0.78rem; color: var(--acn-nero);
+  }
+  .top-nota .fase { color: var(--acn-viola-medio); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* ── Chip persona ── */
+  .chip {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    border: 1px solid var(--acn-viola-chiaro);
+    background: var(--acn-viola-tenue);
+    color: var(--acn-viola-scuro);
+    border-radius: 999px; padding: 0.4rem 0.9rem;
+    font-size: 0.9rem; font-weight: 500;
+  }
+
+  /* ── Mock schematico di schermata (nella palette del brand) ── */
+  .fase-mock {
+    background: var(--acn-bianco);
+    border: 1px solid var(--acn-grigio-chiaro);
+    border-radius: 16px;
+    padding: 0.9rem;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+  }
+  .fase-mock .barra-top { height: 10px; width: 40%; background: var(--acn-viola); border-radius: 6px; }
+  .fase-mock .riga { height: 8px; background: var(--acn-grigio-chiaro); border-radius: 5px; margin-top: 0.65rem; }
+  .fase-mock .riga.corta { width: 55%; }
+  .fase-mock .riga.forte { background: var(--acn-viola-chiaro); }
+  .fase-mock .tag { display:inline-block; height: 16px; width: 58px; border-radius: 999px; background: var(--acn-viola-tenue); margin-top: 0.7rem; }
+
+  /* ── Grafico a barre (infografica: viola + neutri, etichette dirette) ── */
+  .barchart { margin-top: 1.6rem; display: grid; gap: 0.85rem; max-width: 640px; }
+  .barrow { display: grid; grid-template-columns: 9.5rem 1fr auto; align-items: center; gap: 0.8rem; }
+  .barrow .cat { font-size: 0.95rem; font-weight: 500; color: var(--acn-nero); }
+  .track { background: var(--acn-nebbia); border-radius: 6px; height: 22px; overflow: hidden; }
+  .fill { height: 100%; border-radius: 6px; background: var(--acn-grigio-chiaro); }
+  .fill.top { background: var(--acn-viola); }        /* categoria dominante */
+  .fill.sec { background: var(--acn-viola-chiaro); }
+  .barrow .val { font-size: 0.9rem; font-weight: 600; color: var(--acn-viola-scuro); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  @media (max-width: 640px) { .barrow { grid-template-columns: 7rem 1fr auto; } }
+
+  /* ── Freccia prima→dopo ── */
+  .flusso { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1.4rem; align-items: center; margin-top: 2rem; }
+  .flusso .verso { font-size: 2rem; color: var(--acn-viola); font-weight: 600; text-align: center; }
+  @media (max-width: 860px) { .flusso { grid-template-columns: 1fr; } .flusso .verso { transform: rotate(90deg); } }
+
+  /* ── Contatore + aiuto ── */
+  .contatore {
+    position: fixed; bottom: 1.4rem; right: 1.6rem;
+    font-size: 0.78rem; color: var(--acn-nero);
+    background: var(--acn-bianco); border: 1px solid var(--acn-grigio-chiaro);
+    border-radius: 999px; padding: 0.3rem 0.75rem; z-index: 30;
+    font-variant-numeric: tabular-nums;
+  }
+  .aiuto {
+    position: fixed; bottom: 1.4rem; left: 1.6rem;
+    font-size: 0.72rem; color: var(--acn-nero); z-index: 30;
+  }
+
+  /* ── Deviazioni dichiarate ── */
+  .dichiarazione {
+    background: var(--acn-nebbia);
+    border-left: 4px solid var(--acn-viola-chiaro);
+    border-radius: 0 12px 12px 0;
+    padding: 1.2rem 1.4rem;
+  }
+  .dichiarazione h3 { color: var(--acn-viola-scuro); margin-bottom: 0.6rem; }
+  .dichiarazione p, .dichiarazione li { font-size: 0.86rem; color: var(--acn-nero); }
+  .dichiarazione .punti { margin-top: 0.4rem; }
+
+  /* ── Stampa: si resta in light, nessun contrasto da invertire ── */
+  @media print {
+    body { background: var(--acn-bianco); color: var(--acn-nero); }
+    .contatore, .aiuto, .top-nota { display: none; }
+    .slide { min-height: auto; page-break-after: always; border: none; padding: 1.4cm; }
+    h2 { color: var(--acn-viola-scuro); }     /* 13,93:1 su bianco */
+    .cifra { color: var(--acn-viola-medio); } /* 8,34:1: regge anche stampato */
+    blockquote, .barrow .val, code { color: var(--acn-viola-scuro); }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <!-- ══ 1 · COVER ═══════════════════════════════════════════════════ -->
+  <section class="slide" id="s1" aria-label="Copertina">
+    <div class="top-nota">
+      <span class="attrib">Un progetto del team · Hagenthon <span class="org">Accenture</span></span>
+      <span>22 settembre 2026</span>
+    </div>
+    <div class="interno">
+      <div class="lockup grande"><span class="nome">Finanze di Famiglia</span><span class="marchio">&gt;</span></div>
+      <h1 class="spazio">Le spese di famiglia,<br />senza il lavoro di segnarle.</h1>
+      <p class="lead">Una webapp che mostra dove vanno i soldi. E uno scontrino
+        che, fotografato, si registra quasi da solo.</p>
+      <div class="spazio-lg"><span class="chip">Per Sara &amp; Marco — un conto familiare, due modi di riempirlo</span></div>
+    </div>
+  </section>
+
+  <!-- ══ 2 · IL PROBLEMA (concreto) ══════════════════════════════════ -->
+  <section class="slide" id="s2" aria-label="Il problema">
+    <div class="top-nota"><span class="fase">Il problema</span><span></span></div>
+    <div class="interno">
+      <h2>Sara e Marco sanno di spendere troppo. Non sanno in cosa.</h2>
+      <div class="griglia g2">
+        <div>
+          <p>Fine mese, al tavolo della cucina. Vogliono tagliare qualcosa,
+             ma non sanno da dove: i soldi «finiscono» e basta.</p>
+          <p class="spazio">Hanno provato tre app di budget. Le hanno lasciate
+             tutte, per lo stesso motivo — non la pigrizia, ma la fatica di
+             <strong>registrare ogni spesa a mano</strong>. Dopo pochi giorni,
+             l'app resta indietro e diventa inutile.</p>
+        </div>
+        <div>
+          <blockquote>
+            «Ogni sera dovrei ricordare importo, data e categoria di ogni cosa.
+             Dopo tre giorni smetto di segnare — e allora a che serve?»
+            <span class="fonte">Sara &amp; Marco — la persona dell'MVP (voce illustrativa)</span>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 3 · LA PROVA ════════════════════════════════════════════════ -->
+  <section class="slide" id="s3" aria-label="La prova">
+    <div class="top-nota"><span class="fase">La prova</span><span></span></div>
+    <div class="interno">
+      <h2>Il problema non è la volontà. È l'inserimento.</h2>
+      <p class="lead">Registrare <strong>un</strong> movimento a mano, nella scheda
+         «Nuovo movimento» del prodotto:</p>
+      <div class="griglia g2 spazio">
+        <div class="scheda">
+          <div class="num">A mano · per ogni singola spesa</div>
+          <div class="cifra">4 <span class="cifra-eti">campi + Salva</span></div>
+          <p class="spazio">Tipo, importo, data, categoria — poi confermi.
+             Moltiplica per le decine di spese di una famiglia ogni mese:
+             è lì che l'app viene abbandonata.</p>
+          <span class="prova">Prova: <code>ui-output_…_md3/nuovo-movimento.html</code></span>
+        </div>
+        <div class="scheda evidenza">
+          <div class="num">Dallo scontrino · per ogni singola spesa</div>
+          <div class="cifra">1 <span class="cifra-eti">foto + 1 conferma</span></div>
+          <p class="spazio">La foto porta con sé importo, data e — quasi sempre —
+             anche la categoria. Alla persona resta un gesto: dire «sì».</p>
+          <span class="prova">Prova: <code>bot/bot.js</code> · <code>importa-telegram.html</code></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 4 · COME FUNZIONA — due pilastri ════════════════════════════ -->
+  <section class="slide" id="s4" aria-label="Come funziona">
+    <div class="top-nota"><span class="fase">Come funziona</span><span></span></div>
+    <div class="interno">
+      <h2>Due strade, alla pari. La spesa finisce nel posto giusto.</h2>
+      <div class="griglia g2">
+        <div class="scheda">
+          <div class="num">Pilastro 1 — a mano, offline</div>
+          <h3>login › conti › movimenti › dashboard</h3>
+          <p>Tutto vive nel browser, su <code>localStorage</code>. Nessuna rete,
+             nessun account remoto. Il saldo di ogni conto si ricalcola a ogni
+             movimento, così non va mai in disaccordo con i numeri.</p>
+          <div class="fase-mock spazio" aria-hidden="true">
+            <div class="barra-top"></div>
+            <div class="riga forte"></div><div class="riga"></div><div class="riga corta"></div>
+            <span class="tag"></span> <span class="tag"></span>
+          </div>
+        </div>
+        <div class="scheda evidenza">
+          <div class="num">Pilastro 2 — dallo scontrino, con Claude</div>
+          <h3>foto › Claude Vision › conferma › movimento</h3>
+          <p>Una foto al bot Telegram. <strong>Claude Opus (Vision)</strong> legge
+             importo, data e categoria e propone il movimento. Tu apri la webapp,
+             controlli e confermi: <strong>solo allora</strong> entra nei tuoi conti.</p>
+          <div class="fase-mock spazio" aria-hidden="true">
+            <div class="barra-top"></div>
+            <div class="riga"></div><div class="riga forte corta"></div><div class="riga"></div>
+            <span class="tag"></span> <span class="tag"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 5 · PRIMA → DOPO ════════════════════════════════════════════ -->
+  <section class="slide" id="s5" aria-label="Prima e dopo">
+    <div class="top-nota"><span class="fase">Prima → dopo</span><span></span></div>
+    <div class="interno">
+      <h2>Da «non so dove vanno i soldi» a «lo vedo».</h2>
+      <div class="flusso">
+        <div class="scheda">
+          <div class="num">Prima</div>
+          <h3>Nessun quadro</h3>
+          <p>Solo la sensazione di spendere troppo, e nessun punto da cui iniziare
+             a tagliare.</p>
+        </div>
+        <div class="verso" aria-hidden="true">→</div>
+        <div class="scheda evidenza">
+          <div class="num">Dopo · la dashboard</div>
+          <h3>Spese per categoria, questo mese</h3>
+          <div class="barchart" role="img" aria-label="Spese per categoria: Casa 800 euro (55%), Spesa 320 euro (22%), Ristoranti 145 euro (10%), Trasporti 90 euro (6%), Altre categorie 94 euro (6%). Totale 1.449 euro.">
+            <div class="barrow"><span class="cat">Casa</span><span class="track"><span class="fill top" style="width:100%"></span></span><span class="val">€ 800 · 55%</span></div>
+            <div class="barrow"><span class="cat">Spesa</span><span class="track"><span class="fill sec" style="width:40%"></span></span><span class="val">€ 320 · 22%</span></div>
+            <div class="barrow"><span class="cat">Ristoranti</span><span class="track"><span class="fill" style="width:18%"></span></span><span class="val">€ 145 · 10%</span></div>
+            <div class="barrow"><span class="cat">Trasporti</span><span class="track"><span class="fill" style="width:11%"></span></span><span class="val">€ 90 · 6%</span></div>
+            <div class="barrow"><span class="cat">Altre</span><span class="track"><span class="fill" style="width:12%"></span></span><span class="val">€ 94 · 6%</span></div>
+          </div>
+          <p class="spazio"><strong>La casa si mangia oltre metà del mese.</strong>
+             Ora Sara e Marco sanno da dove partire. Filtri per conto e periodo —
+             mese, trimestre, anno.</p>
+          <span class="prova">Dati d'esempio · Prova: <code>dashboard.html</code></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 6 · LA DEMO ~90s ════════════════════════════════════════════ -->
+  <section class="slide" id="s6" aria-label="La demo">
+    <div class="top-nota"><span class="fase">La demo · ~90s</span><span></span></div>
+    <div class="interno">
+      <h2>Novanta secondi, due strade, un confine dichiarato.</h2>
+      <div class="griglia g2">
+        <div class="scheda">
+          <div class="num">Parte A — offline, dal vivo</div>
+          <ul class="punti">
+            <li>Login sui dati pre-seedati in <code>localStorage</code>.</li>
+            <li>Dashboard «prima»: il quadro c'è, ma manca una voce.</li>
+            <li>Aggiungo un movimento a mano.</li>
+            <li>La dashboard si aggiorna: <strong>prima → dopo</strong>.</li>
+          </ul>
+        </div>
+        <div class="scheda evidenza">
+          <div class="num">Parte B — con Claude</div>
+          <ul class="punti">
+            <li>Foto di uno scontrino al bot Telegram.</li>
+            <li>Sulla home appare «scontrini pronti da importare».</li>
+            <li>Apro, controllo la proposta di Claude, <strong>confermo</strong>.</li>
+            <li>Diventa un movimento; la dashboard cambia di nuovo.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="dichiarazione spazio">
+        <h3>Il confine, senza sorprese</h3>
+        <p>La <strong>Parte A gira 100% offline</strong>. La <strong>Parte B richiede
+           il bot</strong> (<code>localhost:3001</code>) e la rete verso Claude. Per
+           sicurezza in sala, la coda scontrini è pre-seedata: la conferma → dashboard
+           si vede anche se la rete manca.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 7 · DOVE SIAMO E DOVE ANDIAMO ═══════════════════════════════ -->
+  <section class="slide" id="s7" aria-label="Dove siamo e dove andiamo">
+    <div class="top-nota"><span class="fase">Dove siamo e dove andiamo</span><span></span></div>
+    <div class="interno">
+      <h2>Cosa funziona adesso, cosa è aperto, dove va.</h2>
+      <div class="griglia g3">
+        <!-- FATTO — presente, con prova -->
+        <div class="scheda">
+          <div class="num">Funziona adesso</div>
+          <ul class="punti">
+            <li><strong>Il flusso completo gira</strong> — login, conti, movimenti categorizzati, dashboard.<span class="prova"><code>ui-output_…_md3/</code></span></li>
+            <li><strong>Claude legge lo scontrino</strong> e propone un movimento.<span class="prova"><code>bot/bot.js</code> · modello claude-opus-5</span></li>
+            <li><strong>La conferma precede la scrittura.</strong><span class="prova"><code>importa-telegram.html</code> · coda <code>/pending</code></span></li>
+            <li><strong>La dashboard aggrega</strong> per categoria e periodo.<span class="prova"><code>dashboard.html</code></span></li>
+          </ul>
+        </div>
+        <!-- APERTO — con il perché -->
+        <div class="scheda">
+          <div class="num">Aperto, e lo diciamo</div>
+          <ul class="punti no">
+            <li><strong>Il login è un gate client-side</strong>, non sicurezza reale — perché è tutto frontend, senza backend.</li>
+            <li><strong>I dati vivono in un solo browser</strong> — perché stanno in <code>localStorage</code>, senza persistenza condivisa.</li>
+            <li><strong>L'import richiede rete e una API key</strong> — perché l'inferenza Vision non è locale.</li>
+          </ul>
+        </div>
+        <!-- PROSSIMI PASSI — futuro, ordine di dipendenza, nessuna data -->
+        <div class="scheda evidenza">
+          <div class="num">I prossimi passi</div>
+          <ul class="punti">
+            <li><strong>Porteremo i dati oltre il browser.</strong> Oggi vivono in <code>localStorage</code>; una persistenza condivisa viene prima, perché tutto il resto ne dipende.</li>
+            <li><strong>Poi un accesso reale.</strong> Dipende dalla persistenza: senza dati fuori dal browser, un login vero non protegge nulla.</li>
+            <li><strong>Infine, la categoria imparata.</strong> Oggi ogni conferma corregge Claude una volta; domani quella correzione affinerà la proposta.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="spazio-lg" style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:1rem;">
+        <div class="lockup"><span class="nome">Finanze di Famiglia</span><span class="marchio">&gt;</span></div>
+        <span class="attrib">Hagenthon · team da 2 · <span class="org">Accenture</span></span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="contatore" id="contatore" aria-hidden="true">1 / 7</div>
+<div class="aiuto" aria-hidden="true">← → per navigare</div>
+
+<script>
+  // Lo scroll resta la via principale; le frecce sono un'aggiunta per la
+  // proiezione, così la pagina funziona anche senza JavaScript.
+  const slides = [...document.querySelectorAll('.slide')];
+  const contatore = document.getElementById('contatore');
+
+  function corrente() {
+    const centro = window.innerHeight / 2;
+    let idx = 0, best = Infinity;
+    slides.forEach((s, i) => {
+      const r = s.getBoundingClientRect();
+      const d = Math.abs((r.top + r.bottom) / 2 - centro);
+      if (d < best) { best = d; idx = i; }
+    });
+    return idx;
+  }
+  function vaiA(i) {
+    const n = Math.max(0, Math.min(slides.length - 1, i));
+    slides[n].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function aggiornaContatore() { contatore.textContent = (corrente() + 1) + ' / ' + slides.length; }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); vaiA(corrente() + 1); }
+    if (e.key === 'ArrowLeft'  || e.key === 'PageUp')   { e.preventDefault(); vaiA(corrente() - 1); }
+  });
+  window.addEventListener('scroll', aggiornaContatore, { passive: true });
+  aggiornaContatore();
+</script>
+</body>
+</html>
