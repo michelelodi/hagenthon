@@ -242,11 +242,13 @@ function formatData(d) {
   return gg + '/' + mm + '/' + yyyy;
 }
 
-// ── Demo seed (scenario Sara & Marco) ─────────────────────────────────────────
+// ── Demo seed (scenario Sara & Marco — un anno di finanze famigliari) ──────────
 function seedDemo() {
-  // Non ri-seedare se ci sono già conti (evita di sovrascrivere il lavoro dell'utente).
-  if (getConti().length > 0) {
-    getAuth(); // garantisce comunque l'esistenza di ff_auth
+  var contiEsistenti = getConti();
+  // Salta il seed se l'utente ha già i propri dati (più di 1 conto, o nome diverso dal vecchio seed).
+  var isVecchioSeed = contiEsistenti.length === 1 && contiEsistenti[0].nome === 'Conto Famiglia';
+  if (contiEsistenti.length > 0 && !isVecchioSeed) {
+    getAuth();
     return;
   }
 
@@ -254,39 +256,190 @@ function seedDemo() {
   writeJSON(FF_CONTI, []);
   writeJSON(FF_MOVIMENTI, []);
 
-  var conto = createConto({ nome: 'Conto Famiglia', saldoIniziale: 2000 });
+  var corrente = createConto({ nome: 'Conto Corrente',    saldoIniziale: 2800 });
+  var carta    = createConto({ nome: 'Conto Corrente Business', saldoIniziale: 2800 });
+  var contanti = createConto({ nome: 'Contanti',          saldoIniziale: 2400 });
 
-  // ~15 movimenti realistici, luglio–settembre 2026, categorie miste.
-  var seed = [
-    // Luglio
-    { tipo: 'entrata', importo: 1800, data: '2026-07-27', categoria: 'Stipendio', descrizione: 'Stipendio Marco' },
-    { tipo: 'uscita', importo: 780, data: '2026-07-05', categoria: 'Casa', descrizione: 'Affitto' },
-    { tipo: 'uscita', importo: 132.4, data: '2026-07-08', categoria: 'Spesa', descrizione: 'Supermercato' },
-    { tipo: 'uscita', importo: 45, data: '2026-07-14', categoria: 'Trasporti', descrizione: 'Benzina' },
-    { tipo: 'uscita', importo: 62, data: '2026-07-19', categoria: 'Ristoranti', descrizione: 'Cena fuori' },
-    // Agosto
-    { tipo: 'entrata', importo: 1800, data: '2026-08-27', categoria: 'Stipendio', descrizione: 'Stipendio Marco' },
-    { tipo: 'uscita', importo: 780, data: '2026-08-04', categoria: 'Casa', descrizione: 'Affitto' },
-    { tipo: 'uscita', importo: 156.8, data: '2026-08-11', categoria: 'Spesa', descrizione: 'Supermercato' },
-    { tipo: 'uscita', importo: 38, data: '2026-08-16', categoria: 'Trasporti', descrizione: 'Benzina' },
-    { tipo: 'uscita', importo: 88.5, data: '2026-08-22', categoria: 'Ristoranti', descrizione: 'Pizzeria in famiglia' },
-    // Settembre (periodo demo — deve risultare non vuoto)
-    { tipo: 'entrata', importo: 1800, data: '2026-09-05', categoria: 'Stipendio', descrizione: 'Stipendio Marco' },
-    { tipo: 'uscita', importo: 780, data: '2026-09-03', categoria: 'Casa', descrizione: 'Affitto' },
-    { tipo: 'uscita', importo: 121.3, data: '2026-09-09', categoria: 'Spesa', descrizione: 'Supermercato' },
-    { tipo: 'uscita', importo: 34, data: '2026-09-15', categoria: 'Ristoranti', descrizione: 'Pranzo' },
-    { tipo: 'uscita', importo: 45, data: '2026-09-18', categoria: 'Trasporti', descrizione: 'Benzina' },
-    { tipo: 'uscita', importo: 12.9, data: '2026-09-20', categoria: 'Abbonamenti', descrizione: 'Streaming' }
+  // Formato: [conto, tipo, importo, 'YYYY-MM-DD', categoria, descrizione]
+  // c = Conto Corrente · k = Conto Corrente Business · x = Contanti
+  var raw = [
+    // ── Ottobre 2025 ──
+    ['c','entrata',1800,'2025-10-27','Stipendio','Stipendio Marco'],
+    ['c','entrata',1600,'2025-10-05','Stipendio','Stipendio Sara'],
+    ['c','uscita', 850, '2025-10-01','Casa',        'Affitto'],
+    ['c','uscita', 130, '2025-10-10','Casa',        'Bolletta luce/gas'],
+    ['c','uscita',  45, '2025-10-15','Abbonamenti', 'Internet e telefono'],
+    ['c','uscita', 162, '2025-10-08','Spesa',       'Supermercato'],
+    ['c','uscita', 138, '2025-10-22','Spesa',       'Supermercato'],
+    ['k','uscita',22.99,'2025-10-01','Abbonamenti', 'Netflix + Spotify'],
+    ['k','uscita',38.5, '2025-10-14','Salute',      'Farmacia'],
+    ['k','uscita',  89, '2025-10-20','Abbigliamento','Giacca autunno'],
+    ['x','uscita',  78, '2025-10-12','Trasporti',   'Benzina'],
+    ['x','uscita',  58, '2025-10-18','Ristoranti',  'Pizzeria'],
+    ['x','uscita',  32, '2025-10-25','Svago',       'Cinema'],
+    // ── Novembre 2025 ──
+    ['c','entrata',1800,'2025-11-27','Stipendio','Stipendio Marco'],
+    ['c','entrata',1600,'2025-11-05','Stipendio','Stipendio Sara'],
+    ['c','uscita', 850, '2025-11-03','Casa',        'Affitto'],
+    ['c','uscita', 150, '2025-11-10','Casa',        'Bolletta luce/gas'],
+    ['c','uscita',  45, '2025-11-15','Abbonamenti', 'Internet e telefono'],
+    ['c','uscita', 158, '2025-11-07','Spesa',       'Supermercato'],
+    ['c','uscita', 144, '2025-11-21','Spesa',       'Supermercato'],
+    ['k','uscita',22.99,'2025-11-01','Abbonamenti', 'Netflix + Spotify'],
+    ['k','uscita', 145, '2025-11-25','Abbigliamento','Black Friday'],
+    ['k','uscita',  42, '2025-11-14','Salute',      'Visita medica'],
+    ['x','uscita',  82, '2025-11-13','Trasporti',   'Benzina'],
+    ['x','uscita',  64, '2025-11-19','Ristoranti',  'Cena fuori'],
+    ['x','uscita',  28, '2025-11-26','Svago',       'Teatro'],
+    // ── Dicembre 2025 ──
+    ['c','entrata',1800,'2025-12-27','Stipendio','Stipendio Marco'],
+    ['c','entrata', 500,'2025-12-15','Stipendio','Tredicesima Marco'],
+    ['c','entrata',1600,'2025-12-05','Stipendio','Stipendio Sara'],
+    ['c','uscita', 850, '2025-12-01','Casa',        'Affitto'],
+    ['c','uscita', 165, '2025-12-10','Casa',        'Bolletta luce/gas'],
+    ['c','uscita',  45, '2025-12-15','Abbonamenti', 'Internet e telefono'],
+    ['c','uscita', 195, '2025-12-07','Spesa',       'Supermercato'],
+    ['c','uscita', 220, '2025-12-20','Spesa',       'Spesa di Natale'],
+    ['k','uscita',22.99,'2025-12-01','Abbonamenti', 'Netflix + Spotify'],
+    ['k','uscita', 180, '2025-12-15','Svago',       'Regali di Natale'],
+    ['k','uscita',  65, '2025-12-10','Abbigliamento','Maglione invernale'],
+    ['x','uscita',  75, '2025-12-12','Trasporti',   'Benzina'],
+    ['x','uscita',  95, '2025-12-24','Ristoranti',  'Cena della Vigilia'],
+    ['x','uscita',  45, '2025-12-27','Svago',       'Giochi per i bambini'],
+    // ── Gennaio 2026 ──
+    ['c','entrata',1800,'2026-01-27','Stipendio','Stipendio Marco'],
+    ['c','entrata',1600,'2026-01-05','Stipendio','Stipendio Sara'],
+    ['c','uscita', 850, '2026-01-02','Casa',        'Affitto'],
+    ['c','uscita', 170, '2026-01-10','Casa',        'Bolletta luce/gas'],
+    ['c','uscita',  45, '2026-01-15','Abbonamenti', 'Internet e telefono'],
+    ['c','uscita', 148, '2026-01-08','Spesa',       'Supermercato'],
+    ['c','uscita', 132, '2026-01-22','Spesa',       'Supermercato'],
+    ['k','uscita',22.99,'2026-01-01','Abbonamenti', 'Netflix + Spotify'],
+    ['k','uscita', 110, '2026-01-10','Abbigliamento','Saldi invernali'],
+    ['k','uscita',  55, '2026-01-20','Salute',      'Farmacia e parafarmacia'],
+    ['x','uscita',  76, '2026-01-14','Trasporti',   'Benzina'],
+    ['x','uscita',  52, '2026-01-20','Ristoranti',  'Pranzo domenica'],
+    ['x','uscita',  22, '2026-01-28','Svago',       'Cinema'],
+    // ── Febbraio 2026 ──
+    ['c','entrata',1800,'2026-02-27','Stipendio','Stipendio Marco'],
+    ['c','entrata',1600,'2026-02-05','Stipendio','Stipendio Sara'],
+    ['c','uscita', 850, '2026-02-02','Casa',        'Affitto'],
+    ['c','uscita', 155, '2026-02-10','Casa',        'Bolletta luce/gas'],
+    ['c','uscita',  45, '2026-02-15','Abbonamenti', 'Internet e telefono'],
+    ['c','uscita', 144, '2026-02-08','Spesa',       'Supermercato'],
+    ['c','uscita', 128, '2026-02-22','Spesa',       'Supermercato'],
+    ['k','uscita',22.99,'2026-02-01','Abbonamenti', 'Netflix + Spotify'],
+    ['k','uscita',  85, '2026-02-14','Ristoranti',  'Cena San Valentino'],
+    ['k','uscita',  48, '2026-02-20','Salute',      'Farmacia'],
+    ['x','uscita',  80, '2026-02-12','Trasporti',   'Benzina'],
+    ['x','uscita',  46, '2026-02-20','Ristoranti',  'Pizzeria'],
+    ['x','uscita',  30, '2026-02-26','Svago',       'Pattinaggio'],
+    // ── Marzo 2026 ──
+    ['c','entrata',1800,'2026-03-27','Stipendio','Stipendio Marco'],
+    ['c','entrata',1600,'2026-03-05','Stipendio','Stipendio Sara'],
+    ['c','uscita', 850, '2026-03-02','Casa',        'Affitto'],
+    ['c','uscita', 140, '2026-03-10','Casa',        'Bolletta luce/gas'],
+    ['c','uscita',  45, '2026-03-15','Abbonamenti', 'Internet e telefono'],
+    ['c','uscita', 155, '2026-03-08','Spesa',       'Supermercato'],
+    ['c','uscita', 140, '2026-03-22','Spesa',       'Supermercato'],
+    ['k','uscita',22.99,'2026-03-01','Abbonamenti', 'Netflix + Spotify'],
+    ['k','uscita', 120, '2026-03-20','Istruzione',  'Corso di lingua'],
+    ['k','uscita',  35, '2026-03-14','Salute',      'Farmacia'],
+    ['x','uscita',  75, '2026-03-13','Trasporti',   'Benzina'],
+    ['x','uscita',  62, '2026-03-19','Ristoranti',  'Cena fuori'],
+    ['x','uscita',  38, '2026-03-25','Svago',       'Parco avventura'],
+    // ── Aprile 2026 ──
+    ['c','entrata',1800,'2026-04-27','Stipendio','Stipendio Marco'],
+    ['c','entrata',1600,'2026-04-05','Stipendio','Stipendio Sara'],
+    ['c','uscita', 850, '2026-04-01','Casa',        'Affitto'],
+    ['c','uscita', 110, '2026-04-10','Casa',        'Bolletta luce/gas'],
+    ['c','uscita',  45, '2026-04-15','Abbonamenti', 'Internet e telefono'],
+    ['c','uscita', 168, '2026-04-08','Spesa',       'Supermercato'],
+    ['c','uscita', 150, '2026-04-22','Spesa',       'Spesa di Pasqua'],
+    ['k','uscita',22.99,'2026-04-01','Abbonamenti', 'Netflix + Spotify'],
+    ['k','uscita',  95, '2026-04-18','Abbigliamento','Abbigliamento primavera'],
+    ['k','uscita',  28, '2026-04-14','Salute',      'Farmacia'],
+    ['x','uscita',  72, '2026-04-12','Trasporti',   'Benzina'],
+    ['x','uscita',  78, '2026-04-20','Ristoranti',  'Pranzo di Pasqua'],
+    ['x','uscita',  35, '2026-04-26','Svago',       'Gita fuoriporta'],
+    // ── Maggio 2026 ──
+    ['c','entrata',1800,'2026-05-27','Stipendio','Stipendio Marco'],
+    ['c','entrata',1600,'2026-05-05','Stipendio','Stipendio Sara'],
+    ['c','uscita', 850, '2026-05-04','Casa',        'Affitto'],
+    ['c','uscita',  90, '2026-05-10','Casa',        'Bolletta luce/gas'],
+    ['c','uscita',  45, '2026-05-15','Abbonamenti', 'Internet e telefono'],
+    ['c','uscita', 154, '2026-05-07','Spesa',       'Supermercato'],
+    ['c','uscita', 136, '2026-05-21','Spesa',       'Supermercato'],
+    ['k','uscita',22.99,'2026-05-01','Abbonamenti', 'Netflix + Spotify'],
+    ['k','uscita',  68, '2026-05-20','Svago',       'Concerto'],
+    ['k','uscita',  32, '2026-05-14','Salute',      'Parafarmacia'],
+    ['x','uscita',  79, '2026-05-13','Trasporti',   'Benzina'],
+    ['x','uscita',  55, '2026-05-19','Ristoranti',  'Cena compleanno'],
+    ['x','uscita',  40, '2026-05-25','Svago',       'Sagra locale'],
+    // ── Giugno 2026 ──
+    ['c','entrata',1800,'2026-06-27','Stipendio','Stipendio Marco'],
+    ['c','entrata',1600,'2026-06-05','Stipendio','Stipendio Sara'],
+    ['c','uscita', 850, '2026-06-01','Casa',        'Affitto'],
+    ['c','uscita',  95, '2026-06-10','Casa',        'Bolletta luce/gas'],
+    ['c','uscita',  45, '2026-06-15','Abbonamenti', 'Internet e telefono'],
+    ['c','uscita', 160, '2026-06-08','Spesa',       'Supermercato'],
+    ['c','uscita', 145, '2026-06-22','Spesa',       'Supermercato'],
+    ['k','uscita',22.99,'2026-06-01','Abbonamenti', 'Netflix + Spotify'],
+    ['k','uscita', 125, '2026-06-15','Abbigliamento','Costumi e abbigliamento estivo'],
+    ['k','uscita',  44, '2026-06-14','Salute',      'Farmacia'],
+    ['x','uscita',  85, '2026-06-12','Trasporti',   'Benzina'],
+    ['x','uscita',  68, '2026-06-18','Ristoranti',  'Aperitivo e cena'],
+    ['x','uscita',  45, '2026-06-25','Svago',       'Piscina'],
+    // ── Luglio 2026 ──
+    ['c','entrata',1800,'2026-07-27','Stipendio','Stipendio Marco'],
+    ['c','entrata',1600,'2026-07-05','Stipendio','Stipendio Sara'],
+    ['c','uscita', 850, '2026-07-01','Casa',        'Affitto'],
+    ['c','uscita',  85, '2026-07-10','Casa',        'Bolletta luce/gas'],
+    ['c','uscita',  45, '2026-07-15','Abbonamenti', 'Internet e telefono'],
+    ['c','uscita', 142, '2026-07-07','Spesa',       'Supermercato'],
+    ['c','uscita', 128, '2026-07-21','Spesa',       'Supermercato'],
+    ['k','uscita',22.99,'2026-07-01','Abbonamenti', 'Netflix + Spotify'],
+    ['k','uscita', 380, '2026-07-15','Svago',       'Vacanze estive'],
+    ['k','uscita',  75, '2026-07-20','Abbigliamento','Saldi estivi'],
+    ['x','uscita',  92, '2026-07-10','Trasporti',   'Benzina viaggio'],
+    ['x','uscita',  82, '2026-07-18','Ristoranti',  'Ristorante in vacanza'],
+    ['x','uscita',  55, '2026-07-25','Svago',       'Escursione'],
+    // ── Agosto 2026 ──
+    ['c','entrata',1800,'2026-08-27','Stipendio','Stipendio Marco'],
+    ['c','entrata',1600,'2026-08-05','Stipendio','Stipendio Sara'],
+    ['c','uscita', 850, '2026-08-01','Casa',        'Affitto'],
+    ['c','uscita',  80, '2026-08-10','Casa',        'Bolletta luce/gas'],
+    ['c','uscita',  45, '2026-08-15','Abbonamenti', 'Internet e telefono'],
+    ['c','uscita', 138, '2026-08-05','Spesa',       'Supermercato'],
+    ['c','uscita', 145, '2026-08-20','Spesa',       'Supermercato'],
+    ['k','uscita',22.99,'2026-08-01','Abbonamenti', 'Netflix + Spotify'],
+    ['k','uscita', 250, '2026-08-10','Svago',       'Vacanze - attività'],
+    ['k','entrata',120, '2026-08-25','Rimborso',    'Rimborso spese lavoro Sara'],
+    ['x','uscita',  88, '2026-08-08','Trasporti',   'Benzina viaggio'],
+    ['x','uscita',  75, '2026-08-15','Ristoranti',  'Cena di Ferragosto'],
+    ['x','uscita',  40, '2026-08-22','Svago',       'Parco acquatico'],
+    // ── Settembre 2026 (fino al 22) ──
+    ['c','entrata',1600,'2026-09-05','Stipendio','Stipendio Sara'],
+    ['c','uscita', 850, '2026-09-01','Casa',        'Affitto'],
+    ['c','uscita', 100, '2026-09-10','Casa',        'Bolletta luce/gas'],
+    ['c','uscita',  45, '2026-09-15','Abbonamenti', 'Internet e telefono'],
+    ['c','uscita', 155, '2026-09-08','Spesa',       'Supermercato'],
+    ['c','uscita', 142, '2026-09-18','Spesa',       'Supermercato'],
+    ['k','uscita',22.99,'2026-09-01','Abbonamenti', 'Netflix + Spotify'],
+    ['k','uscita', 185, '2026-09-15','Istruzione',  'Materiale scolastico'],
+    ['x','uscita',  80, '2026-09-12','Trasporti',   'Benzina'],
+    ['x','uscita',  62, '2026-09-19','Ristoranti',  'Cena fuori']
   ];
 
-  seed.forEach(function (m) {
+  var contoMap = { c: corrente.id, k: carta.id, x: contanti.id };
+  raw.forEach(function (r) {
     createMovimento({
-      contoId: conto.id,
-      tipo: m.tipo,
-      importo: m.importo,
-      data: m.data,
-      categoria: m.categoria,
-      descrizione: m.descrizione,
+      contoId: contoMap[r[0]],
+      tipo:        r[1],
+      importo:     r[2],
+      data:        r[3],
+      categoria:   r[4],
+      descrizione: r[5],
       fonte: 'manuale'
     });
   });
