@@ -99,6 +99,82 @@ async function analizzaScontrino(base64Image, mimeType = 'image/jpeg') {
 // ── Bot Telegram (polling) ────────────────────────────────────────────────────
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 
+// Elenco conti sincronizzato dalla webapp (POST /conti): [{ id, nome }].
+// Serve per far scegliere il conto direttamente su Telegram.
+let contiWebapp = [];
+
+// Scontrini letti in attesa che l'utente scelga il conto (id breve → expense).
+const attesaConto = new Map();
+
+function makeExpense(dati) {
+  return {
+    id: `tg_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    importo: dati.importo,
+    descrizione: dati.descrizione,
+    data: dati.data,
+    categoria: dati.categoria,
+    tipo: 'uscita',
+    fiducia: dati.fiducia,
+    fonte: 'telegram',
+    timestamp: new Date().toISOString()
+  };
+}
+
+function riepilogo(e) {
+  const emo = e.fiducia >= 0.8 ? '✅' : e.fiducia >= 0.5 ? '⚠️' : '❓';
+  return `${emo} Scontrino letto!\n\n` +
+    `📍 *${e.descrizione}*\n💶 €${e.importo.toFixed(2)}\n🏷️ ${e.categoria}\n📅 ${e.data}`;
+}
+
+// Dopo la lettura: chiede su Telegram in quale conto registrare (tastiera inline).
+// Se la webapp non ha ancora sincronizzato i conti, ripiega sull'import nel conto principale.
+async function proponiConto(chatId, messageId, expense) {
+  if (contiWebapp.length === 0) {
+    addPending(expense);
+    await bot.editMessageText(
+      riepilogo(expense) + '\n\n⚠️ Nessun conto disponibile (apri la webapp): ' +
+      'lo registro nel conto principale. Riapri l\'app e rimanda la foto per scegliere il conto.',
+      { chat_id: chatId, message_id: messageId, parse_mode: 'Markdown' }
+    );
+    return;
+  }
+  const sid = Math.random().toString(36).slice(2, 8);
+  attesaConto.set(sid, expense);
+  // Pulizia: scade dopo 10 minuti per non tenere memoria all'infinito.
+  setTimeout(() => attesaConto.delete(sid), 10 * 60 * 1000);
+
+  const inline_keyboard = contiWebapp.map((c, i) => ([{ text: c.nome, callback_data: `c:${sid}:${i}` }]));
+  await bot.editMessageText(
+    riepilogo(expense) + '\n\n🏦 In quale conto lo registro?',
+    { chat_id: chatId, message_id: messageId, parse_mode: 'Markdown', reply_markup: { inline_keyboard } }
+  );
+}
+
+// L'utente ha scelto il conto sulla tastiera inline.
+bot.on('callback_query', async (q) => {
+  try {
+    const m = (q.data || '').match(/^c:([a-z0-9]+):(\d+)$/i);
+    if (!m) { await bot.answerCallbackQuery(q.id); return; }
+    const expense = attesaConto.get(m[1]);
+    const conto = contiWebapp[Number(m[2])];
+    if (!expense || !conto) {
+      await bot.answerCallbackQuery(q.id, { text: 'Scelta scaduta: rimanda la foto.' });
+      return;
+    }
+    expense.contoId = conto.id;
+    expense.contoNome = conto.nome;
+    addPending(expense);
+    attesaConto.delete(m[1]);
+    await bot.answerCallbackQuery(q.id, { text: `Registrato in ${conto.nome}` });
+    await bot.editMessageText(
+      riepilogo(expense) + `\n\n🏦 Conto scelto: *${conto.nome}*\n\nRegistrato ✅ — compare nella webapp tra pochi secondi.`,
+      { chat_id: q.message.chat.id, message_id: q.message.message_id, parse_mode: 'Markdown' }
+    );
+  } catch (err) {
+    console.error('Errore callback conto:', err);
+  }
+});
+
 bot.onText(/\/start/, (msg) => {
   bot.sendMessage(msg.chat.id,
     '👋 Ciao! Sono il tuo assistente per le spese.\n\n' +
@@ -137,33 +213,8 @@ bot.on('photo', async (msg) => {
 
     const base64 = await downloadImageAsBase64(fileUrl);
     const dati = await analizzaScontrino(base64);
-
-    const id = `tg_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    const expense = {
-      id,
-      importo: dati.importo,
-      descrizione: dati.descrizione,
-      data: dati.data,
-      categoria: dati.categoria,
-      tipo: 'uscita',
-      fiducia: dati.fiducia,
-      fonte: 'telegram',
-      timestamp: new Date().toISOString()
-    };
-
-    addPending(expense);
-
-    const fiduciaEmoji = dati.fiducia >= 0.8 ? '✅' : dati.fiducia >= 0.5 ? '⚠️' : '❓';
-
-    await bot.editMessageText(
-      `${fiduciaEmoji} Scontrino letto!\n\n` +
-      `📍 *${expense.descrizione}*\n` +
-      `💶 €${expense.importo.toFixed(2)}\n` +
-      `🏷️ ${expense.categoria}\n` +
-      `📅 ${expense.data}\n\n` +
-      `Registrato automaticamente ✅ — compare nella webapp entro pochi secondi.`,
-      { chat_id: chatId, message_id: waitMsg.message_id, parse_mode: 'Markdown' }
-    );
+    const expense = makeExpense(dati);
+    await proponiConto(chatId, waitMsg.message_id, expense);
 
   } catch (err) {
     console.error('Errore analisi scontrino:', err);
@@ -188,19 +239,8 @@ bot.on('document', async (msg) => {
     const fileUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${fileInfo.file_path}`;
     const base64 = await downloadImageAsBase64(fileUrl);
     const dati = await analizzaScontrino(base64, doc.mime_type);
-
-    const id = `tg_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    const expense = {
-      id, importo: dati.importo, descrizione: dati.descrizione,
-      data: dati.data, categoria: dati.categoria, tipo: 'uscita',
-      fiducia: dati.fiducia, fonte: 'telegram', timestamp: new Date().toISOString()
-    };
-    addPending(expense);
-
-    await bot.editMessageText(
-      `✅ Scontrino letto!\n\n📍 *${expense.descrizione}*\n💶 €${expense.importo.toFixed(2)}\n🏷️ ${expense.categoria}\n📅 ${expense.data}\n\nRegistrato automaticamente ✅ — compare nella webapp tra pochi secondi.`,
-      { chat_id: chatId, message_id: waitMsg.message_id, parse_mode: 'Markdown' }
-    );
+    const expense = makeExpense(dati);
+    await proponiConto(chatId, waitMsg.message_id, expense);
   } catch (err) {
     console.error('Errore:', err);
     bot.editMessageText('❌ Errore nell\'analisi. Riprova.', { chat_id: chatId, message_id: waitMsg.message_id });
@@ -211,6 +251,16 @@ bot.on('document', async (msg) => {
 const app = express();
 app.use(cors({ origin: '*' }));
 app.use(express.json());
+
+// POST /conti — la webapp sincronizza i suoi conti [{ id, nome }] così il bot
+// può farli scegliere su Telegram.
+app.post('/conti', (req, res) => {
+  const list = Array.isArray(req.body) ? req.body : (req.body && req.body.conti) || [];
+  contiWebapp = list
+    .filter((c) => c && c.id && c.nome)
+    .map((c) => ({ id: String(c.id), nome: String(c.nome) }));
+  res.json({ ok: true, count: contiWebapp.length });
+});
 
 // GET /pending — lista spese in attesa
 app.get('/pending', (req, res) => {
