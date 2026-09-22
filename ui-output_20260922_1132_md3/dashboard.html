@@ -611,6 +611,11 @@
     });
 
     aggiorna();
+    // Auto-import Telegram: ridisegna la dashboard quando arriva un nuovo movimento.
+    window.addEventListener('telegram:imported', aggiorna);
   </script>
+
+  <!-- Auto-import degli scontrini letti dal bot Telegram (registra in localStorage senza click). -->
+  <script src="telegram-autoimport.js"></script>
 </body>
 </html>

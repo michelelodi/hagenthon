@@ -1,8 +1,11 @@
 ---
 status: accepted
+superseded-in-part-by: 0002
 ---
 
 # Webapp tradizionale di finanze personali, senza LLM a runtime
+
+> ⚠️ **Aggiornamento — [ADR-0002](0002-scontrini-telegram-llm.md).** È stato aggiunto un canale opzionale di cattura scontrini via Telegram che usa un **LLM a runtime** (tramite `tools/askclaude/`, il CLI `claude` locale — nessuna API key) **+ rete**. Questo **supera in parte** i confini "senza LLM" e "nessuna rete" qui sotto, e rende `tools/askclaude/` **usato** dal prodotto. Il resto della webapp resta FE-only e offline.
 
 ## Contesto
 Hackathon Hagenthon (Accenture, ~5h). Il perimetro [CLAUDE.md](../../CLAUDE.md) poneva come confine non negoziabile #1 un **LLM integrato nel prodotto a runtime** (via `tools/askclaude/`) con chiusura del loop fino a un'azione. In questo ambiente **non esiste un modello locale**: l'inferenza reale della CLI `claude` richiede rete e l'"offline" è ottenibile solo con lo stub a risposte registrate (vedi `docs/superpowers/specs/2026-09-22-askclaude-wrapper-design.md`, Rischio #1).

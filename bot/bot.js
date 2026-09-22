@@ -1,15 +1,20 @@
 import 'dotenv/config';
 import TelegramBot from 'node-telegram-bot-api';
-import Anthropic from '@anthropic-ai/sdk';
 import express from 'express';
 import cors from 'cors';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import https from 'https';
+import { askClaude } from '../tools/askclaude/askclaude.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PENDING_FILE = join(__dirname, 'pending-expenses.json');
+
+// Modello per la lettura dello scontrino. 'sonnet' = veloce/economico e sufficiente
+// per uno scontrino; 'opus' per massima accuratezza. Per la demo 100% offline punta
+// ASKCLAUDE_CLAUDE_BIN allo stub a risposte registrate (vedi tools/askclaude/README.md).
+const MODEL = 'sonnet';
 
 // ── Categorie uscite (speculari alla webapp) ──────────────────────────────────
 const CATEGORIE_USCITA = [
@@ -17,6 +22,21 @@ const CATEGORIE_USCITA = [
   'Salute', 'Abbigliamento', 'Svago', 'Istruzione',
   'Abbonamenti', 'Altro'
 ];
+
+// Schema imposto nativamente (--json-schema via askclaude): l'output è già
+// strutturato e la categoria è vincolata alla lista sopra.
+const SCHEMA_SCONTRINO = {
+  type: 'object',
+  properties: {
+    importo: { type: 'number' },
+    descrizione: { type: 'string' },
+    data: { type: 'string' },
+    categoria: { type: 'string', enum: CATEGORIE_USCITA },
+    fiducia: { type: 'number' }
+  },
+  required: ['importo', 'descrizione', 'data', 'categoria', 'fiducia'],
+  additionalProperties: false
+};
 
 // ── Storage locale ────────────────────────────────────────────────────────────
 function readPending() {
@@ -52,38 +72,25 @@ async function downloadImageAsBase64(url) {
   });
 }
 
-// ── Analisi scontrino con Claude Vision ───────────────────────────────────────
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
+// ── Analisi scontrino con Claude Vision, via askclaude → CLI `claude` locale ────
+// Nessuna API key: usa l'auth di Claude Code. Vedi tools/askclaude/README.md.
 async function analizzaScontrino(base64Image, mimeType = 'image/jpeg') {
-  const msg = await anthropic.messages.create({
-    model: 'claude-opus-5',
-    max_tokens: 512,
-    messages: [{
-      role: 'user',
-      content: [
-        {
-          type: 'image',
-          source: { type: 'base64', media_type: mimeType, data: base64Image }
-        },
-        {
-          type: 'text',
-          text: `Analizza questo scontrino e restituisci SOLO un oggetto JSON valido con questi campi:
-{
-  "importo": <numero float, es. 12.50>,
-  "descrizione": "<negozio o descrizione breve, max 40 caratteri>",
-  "data": "<data nel formato YYYY-MM-DD, usa oggi se non leggibile>",
-  "categoria": "<una tra: ${CATEGORIE_USCITA.join(', ')}>",
-  "fiducia": <numero 0-1 che indica quanto sei sicuro dell'estrazione>
-}
-Rispondi SOLO con il JSON, senza markdown, senza spiegazioni.`
-        }
-      ]
-    }]
+  const oggi = new Date().toISOString().slice(0, 10);
+  const r = await askClaude({
+    prompt:
+      'Analizza questo scontrino ed estrai i dati della spesa.\n' +
+      '- importo: totale pagato come numero (es. 12.50)\n' +
+      '- descrizione: negozio o descrizione breve, max 40 caratteri\n' +
+      `- data: data dello scontrino in formato YYYY-MM-DD; se non leggibile usa ${oggi}\n` +
+      `- categoria: una tra ${CATEGORIE_USCITA.join(', ')}\n` +
+      "- fiducia: quanto sei sicuro dell'estrazione, da 0 a 1",
+    images: [{ base64: base64Image, mediaType: mimeType }],
+    schema: SCHEMA_SCONTRINO,
+    model: MODEL,
+    timeoutMs: 60000
   });
-
-  const text = msg.content[0].text.trim();
-  return JSON.parse(text);
+  if (!r.ok) throw new Error(`askclaude [${r.error.type}]: ${r.error.message}`);
+  return r.data;
 }
 
 // ── Bot Telegram (polling) ────────────────────────────────────────────────────
@@ -92,8 +99,8 @@ const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 bot.onText(/\/start/, (msg) => {
   bot.sendMessage(msg.chat.id,
     '👋 Ciao! Sono il tuo assistente per le spese.\n\n' +
-    '📷 Inviami la foto di uno scontrino e lo aggiungerò automaticamente alle tue finanze.\n\n' +
-    'Poi apri la webapp e clicca su "Importa da Telegram" per confermare.'
+    '📷 Inviami la foto di uno scontrino e lo registro automaticamente nelle tue finanze.\n\n' +
+    'Tieni aperta la webapp: il movimento compare da solo entro pochi secondi.'
   );
 });
 
@@ -151,7 +158,7 @@ bot.on('photo', async (msg) => {
       `💶 €${expense.importo.toFixed(2)}\n` +
       `🏷️ ${expense.categoria}\n` +
       `📅 ${expense.data}\n\n` +
-      `Apri la webapp e clicca su *"Importa da Telegram"* per confermare.`,
+      `Registrato automaticamente ✅ — compare nella webapp entro pochi secondi.`,
       { chat_id: chatId, message_id: waitMsg.message_id, parse_mode: 'Markdown' }
     );
 
@@ -188,7 +195,7 @@ bot.on('document', async (msg) => {
     addPending(expense);
 
     await bot.editMessageText(
-      `✅ Scontrino letto!\n\n📍 *${expense.descrizione}*\n💶 €${expense.importo.toFixed(2)}\n🏷️ ${expense.categoria}\n📅 ${expense.data}\n\nApri la webapp e clicca *"Importa da Telegram"*.`,
+      `✅ Scontrino letto!\n\n📍 *${expense.descrizione}*\n💶 €${expense.importo.toFixed(2)}\n🏷️ ${expense.categoria}\n📅 ${expense.data}\n\nRegistrato automaticamente ✅ — compare nella webapp tra pochi secondi.`,
       { chat_id: chatId, message_id: waitMsg.message_id, parse_mode: 'Markdown' }
     );
   } catch (err) {
@@ -222,6 +229,7 @@ app.delete('/pending', (req, res) => {
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`\n🤖 Bot Telegram avviato (polling)`);
+  console.log(`🧠 Lettura scontrini via askclaude → CLI 'claude' locale (nessuna API key)`);
   console.log(`🌐 API locale su http://localhost:${PORT}`);
   console.log(`📋 Endpoint webapp: GET http://localhost:${PORT}/pending`);
   console.log('\nInvia /start al bot su Telegram per iniziare.\n');

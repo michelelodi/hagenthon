@@ -21,3 +21,4 @@ Ogni agente **legge questo indice a inizio sessione** e **scrive/aggiorna qui**,
 - [Persona: Sara & Marco](persona-sara-marco.md) — famiglia, un conto; barriera = inserimento manuale
 - [Idea: webapp finanze personali](idea-finanze-personali-webapp.md) — conti/movimenti/dashboard, FE + localStorage, senza LLM
 - [Decisione: niente LLM (webapp tradizionale)](decisione-no-llm-webapp-tradizionale.md) — rinuncia consapevole al confine #1; vedi ADR-0001
+- [Decisione: scontrini via Telegram con LLM](decisione-scontrini-telegram-llm.md) — bot + Claude Vision via askclaude + auto-import; supera in parte ADR-0001, vedi ADR-0002

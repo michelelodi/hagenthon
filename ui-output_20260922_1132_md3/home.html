@@ -433,7 +433,13 @@
     }
     checkTelegramPending();
     setInterval(checkTelegramPending, 15000);
+
+    // Auto-import Telegram: ridisegna i conti quando arriva un nuovo movimento.
+    window.addEventListener('telegram:imported', renderConti);
   </script>
+
+  <!-- Auto-import degli scontrini letti dal bot Telegram (registra in localStorage senza click). -->
+  <script src="telegram-autoimport.js"></script>
 
 </body>
 </html>
