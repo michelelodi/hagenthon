@@ -422,37 +422,37 @@
     </div>
   </section>
 
-  <!-- ══ 6 · LA DEMO ~90s ════════════════════════════════════════════ -->
-  <section class="slide" id="s6" aria-label="La demo">
-    <div class="top-nota"><span class="fase">La demo · ~90s</span><span></span></div>
+  <!-- ══ 6 · IL REPORT — decisioni informate ═════════════════════════ -->
+  <section class="slide" id="s6" aria-label="Il report">
+    <div class="top-nota"><span class="fase">Il report</span><span></span></div>
     <div class="interno">
-      <h2>Novanta secondi, due strade, un confine dichiarato.</h2>
+      <h2>Dai numeri alla decisione: Claude spiega il mese in parole.</h2>
+      <p class="lead">Vedere la ripartizione è metà strada. Sara e Marco vogliono
+         sapere <strong>cosa farci</strong> — e l'analisi risponde su due livelli.</p>
       <div class="griglia g2">
         <div class="scheda">
-          <div class="num">Parte A — offline, dal vivo</div>
-          <ul class="punti">
-            <li>Login sui dati pre-seedati in <code>localStorage</code>.</li>
-            <li>Dashboard «prima»: il quadro c'è, ma manca una voce.</li>
-            <li>Aggiungo un movimento a mano.</li>
-            <li>La dashboard si aggiorna: <strong>prima → dopo</strong>.</li>
-          </ul>
+          <div class="num">Sempre attiva · offline, in tempo reale</div>
+          <h3>Gli insight, nel browser</h3>
+          <p>A ogni movimento la card «Analisi» ricalcola i segnali: spese oltre le
+             entrate, categorie in crescita, spese anomale, categoria dominante,
+             tasso di risparmio. Nessuna rete, nessuna attesa.</p>
+          <span class="prova">Prova: <code>analysis.js</code> · card «Analisi» in <code>dashboard.html</code></span>
         </div>
         <div class="scheda evidenza">
-          <div class="num">Parte B — con Claude</div>
-          <ul class="punti">
-            <li>Foto di uno scontrino al bot Telegram.</li>
-            <li>Claude lo legge: importo, data, categoria.</li>
-            <li>Con la webapp aperta, il movimento <strong>si registra da solo</strong> — un toast lo annuncia.</li>
-            <li>La dashboard cambia di nuovo, senza toccare la tastiera.</li>
-          </ul>
+          <div class="num">Su richiesta · il mese raccontato da Claude</div>
+          <h3>«Genera report AI»</h3>
+          <p>Un clic, e <strong>Claude</strong> scrive in tempo reale un report in
+             italiano: 2–4 osservazioni e un suggerimento pratico. Via il CLI
+             <code>claude</code> locale — <strong>nessuna API key</strong>.</p>
+          <span class="prova">Prova: <code>report-server/</code> · <code>tools/askclaude</code></span>
         </div>
       </div>
       <div class="dichiarazione spazio">
-        <h3>Il confine, senza sorprese</h3>
-        <p>La <strong>Parte A gira 100% offline</strong>. La <strong>Parte B live</strong>
-           richiede il bot (<code>localhost:3001</code>), il CLI <code>claude</code>
-           loggato e la rete per l'inferenza. Per sicurezza in sala la coda scontrini è
-           pre-seedata: l'<strong>import → dashboard</strong> si vede anche senza rete.</p>
+        <h3>Descrive, non prescrive</h3>
+        <p>Il report <strong>racconta cosa emerge dai dati</strong> e offre suggerimenti
+           di buon senso — riconoscendo anche i mesi virtuosi, non solo gli sforamenti.
+           <strong>Niente consulenza finanziaria personalizzata.</strong> Senza rete
+           restano gli insight offline: l'analisi non si ferma mai.</p>
       </div>
     </div>
   </section>
