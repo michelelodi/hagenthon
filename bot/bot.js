@@ -23,20 +23,9 @@ const CATEGORIE_USCITA = [
   'Abbonamenti', 'Altro'
 ];
 
-// Schema imposto nativamente (--json-schema via askclaude): l'output è già
-// strutturato e la categoria è vincolata alla lista sopra.
-const SCHEMA_SCONTRINO = {
-  type: 'object',
-  properties: {
-    importo: { type: 'number' },
-    descrizione: { type: 'string' },
-    data: { type: 'string' },
-    categoria: { type: 'string', enum: CATEGORIE_USCITA },
-    fiducia: { type: 'number' }
-  },
-  required: ['importo', 'descrizione', 'data', 'categoria', 'fiducia'],
-  additionalProperties: false
-};
+// NB: il CLI `claude` NON applica `--json-schema` agli input immagine (vision):
+// risponderebbe in prosa. Quindi niente schema: chiediamo JSON esplicito nel
+// prompt (askclaude aggiunge il nudge "solo JSON" + repair) e normalizziamo dopo.
 
 // ── Storage locale ────────────────────────────────────────────────────────────
 function readPending() {
@@ -78,19 +67,33 @@ async function analizzaScontrino(base64Image, mimeType = 'image/jpeg') {
   const oggi = new Date().toISOString().slice(0, 10);
   const r = await askClaude({
     prompt:
-      'Analizza questo scontrino ed estrai i dati della spesa.\n' +
-      '- importo: totale pagato come numero (es. 12.50)\n' +
-      '- descrizione: negozio o descrizione breve, max 40 caratteri\n' +
-      `- data: data dello scontrino in formato YYYY-MM-DD; se non leggibile usa ${oggi}\n` +
-      `- categoria: una tra ${CATEGORIE_USCITA.join(', ')}\n` +
-      "- fiducia: quanto sei sicuro dell'estrazione, da 0 a 1",
+      'Analizza questo scontrino e restituisci SOLO un oggetto JSON valido ' +
+      '(nessun altro testo, niente markdown, niente spiegazioni) con questi campi:\n' +
+      '{\n' +
+      '  "importo": <numero, totale pagato, es. 12.50>,\n' +
+      '  "descrizione": "<negozio o descrizione breve, max 40 caratteri>",\n' +
+      `  "data": "<data dello scontrino in formato YYYY-MM-DD; se non leggibile usa ${oggi}>",\n` +
+      `  "categoria": "<una tra: ${CATEGORIE_USCITA.join(', ')}>",\n` +
+      '  "fiducia": <numero da 0 a 1, quanto sei sicuro dell\'estrazione>\n' +
+      '}',
     images: [{ base64: base64Image, mediaType: mimeType }],
-    schema: SCHEMA_SCONTRINO,
     model: MODEL,
     timeoutMs: 60000
   });
   if (!r.ok) throw new Error(`askclaude [${r.error.type}]: ${r.error.message}`);
-  return r.data;
+
+  // Normalizzazione difensiva (senza schema nativo).
+  const d = r.data || {};
+  const categoria = CATEGORIE_USCITA.includes(d.categoria) ? d.categoria : 'Altro';
+  const importo = Number(d.importo);
+  const fiducia = Number(d.fiducia);
+  return {
+    importo: isNaN(importo) ? 0 : importo,
+    descrizione: String(d.descrizione || 'Scontrino').slice(0, 40),
+    data: /^\d{4}-\d{2}-\d{2}$/.test(d.data) ? d.data : oggi,
+    categoria: categoria,
+    fiducia: isNaN(fiducia) ? 0.5 : Math.max(0, Math.min(1, fiducia))
+  };
 }
 
 // ── Bot Telegram (polling) ────────────────────────────────────────────────────
