@@ -34,11 +34,29 @@
     if (s.indexOf(id) === -1) { s.push(id); localStorage.setItem(SEEN_KEY, JSON.stringify(s)); }
   }
 
+  // Sincronizza i conti al bot così l'utente può sceglierli su Telegram.
+  var contiSig = '';
+  async function syncConti(conti) {
+    var sig = conti.map(function (c) { return c.id + ':' + c.nome; }).join('|');
+    if (sig === contiSig) return;                 // invia solo quando cambia
+    try {
+      await fetch(BOT_API + '/conti', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(conti.map(function (c) { return { id: c.id, nome: c.nome }; })),
+        signal: AbortSignal.timeout(3000)
+      });
+      contiSig = sig;
+    } catch (e) { /* bot spento → riprova al prossimo giro */ }
+  }
+
   async function poll() {
     // storage.js deve essere caricato e deve esistere un conto in cui registrare.
     if (typeof getConti !== 'function' || typeof createMovimento !== 'function') return;
     var conti = getConti();
     if (conti.length === 0) return;
+
+    syncConti(conti); // fire-and-forget: tiene il bot aggiornato sui conti
 
     var items;
     try {
