@@ -184,6 +184,16 @@
       -webkit-appearance: none;
     }
 
+    /* Il placeholder appare solo quando il campo è a fuoco (la label è già salita),
+       così non si sovrappone alla label centrata a riposo. */
+    .text-field__input::placeholder {
+      color: transparent;
+    }
+
+    .text-field__container:focus-within .text-field__input::placeholder {
+      color: var(--md-on-surface-variant);
+    }
+
     .text-field__input-wrapper--no-icon .text-field__input {
       padding-left: 0;
     }

@@ -397,11 +397,10 @@
     <!-- ── Top App Bar ── -->
     <header class="top-app-bar">
       <span class="top-app-bar__title">Dashboard</span>
-      <!-- Filtro conto: non interattivo nel MVP (sempre tutti i conti) -->
-      <div class="filter-chip" role="group" aria-label="Filtra per conto" aria-disabled="true"
-           style="opacity:0.6;cursor:default;">
+      <!-- Filtro conto: seleziona un conto o tutti -->
+      <div class="filter-chip" role="group" aria-label="Filtra per conto">
         <span class="material-symbols-outlined" aria-hidden="true">filter_list</span>
-        <span class="filter-chip__label">Tutti i conti</span>
+        <select id="conto-filter" class="filter-chip__select" aria-label="Seleziona conto"><!-- popolato da JS --></select>
       </div>
     </header>
 
@@ -503,7 +502,26 @@
     }
 
     var periodoCorrente = 'mese';
+    var contoFilter = '';   // '' = tutti i conti
     var pieChart = null;
+
+    // Popola il filtro conto: "Tutti i conti" + un'opzione per ogni conto.
+    (function popolaFiltroConti() {
+      var sel = document.getElementById('conto-filter');
+      var esc = function (s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      };
+      var opts = ['<option value="">Tutti i conti</option>'];
+      getConti().forEach(function (c) {
+        opts.push('<option value="' + esc(c.id) + '">' + esc(c.nome) + '</option>');
+      });
+      sel.innerHTML = opts.join('');
+      sel.addEventListener('change', function () {
+        contoFilter = sel.value;
+        aggiorna();
+      });
+    })();
 
     function totali(movimenti) {
       var entrate = 0, uscite = 0;
@@ -564,11 +582,16 @@
     }
 
     function aggiorna() {
-      // Saldo totale = somma dei saldi di tutti i conti.
-      var saldoTot = getConti().reduce(function (s, c) { return s + Number(c.saldo); }, 0);
+      var conti = getConti();
+
+      // Saldo: del conto selezionato, oppure somma di tutti i conti.
+      var saldoTot = contoFilter
+        ? Number((getConto(contoFilter) || {}).saldo || 0)
+        : conti.reduce(function (s, c) { return s + Number(c.saldo); }, 0);
       document.getElementById('saldo-totale').textContent = formatEuro(saldoTot);
 
-      var movimenti = filterByPeriodo(getMovimenti(), periodoCorrente, new Date());
+      // Movimenti del conto selezionato (o di tutti), filtrati per periodo.
+      var movimenti = filterByPeriodo(getMovimenti(contoFilter || undefined), periodoCorrente, new Date());
       var t = totali(movimenti);
       document.getElementById('tot-entrate').textContent = formatEuro(t.entrate);
       document.getElementById('tot-uscite').textContent = formatEuro(t.uscite);
