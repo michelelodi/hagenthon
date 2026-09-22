@@ -806,7 +806,8 @@
         out.textContent = data.report;
       } catch (e) {
         out.className = 'report-out report-out--error';
-        out.textContent = 'Report non disponibile: il servizio non risponde. ' +
+        var motivo = (e && e.message) ? ' (dettaglio: ' + e.message + ')' : '';
+        out.textContent = 'Report non disponibile' + motivo + '. ' +
           'Avvia l\'app con "node report-server/server.mjs" e aprila su http://localhost:3002/login.html ' +
           '(il report richiede il CLI claude). Gli insight qui sopra restano sempre disponibili offline.';
       } finally {
