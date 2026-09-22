@@ -1,0 +1,38 @@
+{
+  "env": {
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "64000"
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": false,
+    "context7@claude-plugins-official": false,
+    "code-simplifier@claude-plugins-official": false,
+    "code-review@claude-plugins-official": false,
+    "playwright@claude-plugins-official": false,
+    "skill-creator@claude-plugins-official": false,
+    "claude-code-setup@claude-plugins-official": false,
+    "superpowers@claude-plugins-official": false,
+    "mattpocock-skills@claude-plugins-official": true
+  },
+  "tui": "fullscreen",
+  "skipDangerousModePermissionPrompt": true,
+  "skipAutoPermissionPrompt": true,
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "WebFetch(*)",
+      "WebSearch(*)",
+      "Agent(*)",
+      "NotebookEdit(*)",
+      "TodoWrite(*)",
+      "TodoRead(*)",
+      "Bash(wc -l hcsdk.yaml)",
+      "Bash(head -c 400 hcsdk.yaml)"
+    ],
+    "defaultMode": "auto"
+  }
+}
