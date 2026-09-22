@@ -6,6 +6,8 @@
   <title>Nuovo Movimento — Finanze di Famiglia</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <script src="storage.js"></script>
+  <script>if (!isLoggedIn()) window.location.replace('login.html');</script>
   <style>
     :root {
       --md-primary: #0061A4;
@@ -371,7 +373,7 @@
 
     <!-- Top App Bar -->
     <header class="top-app-bar">
-      <a href="dettaglio-conto.html" class="top-app-bar__leading" aria-label="Indietro">
+      <a href="dettaglio-conto.html" id="back-link" class="top-app-bar__leading" aria-label="Indietro">
         <span class="material-symbols-outlined">arrow_back</span>
       </a>
       <h1 class="top-app-bar__title">Nuovo movimento</h1>
@@ -454,9 +456,13 @@
         </div>
       </div>
 
+      <!-- Messaggio di errore inline -->
+      <p id="form-error" role="alert" hidden
+         style="color:var(--md-error);font-size:12px;margin-top:calc(-1 * var(--spacing-md));margin-bottom:var(--spacing-md);"></p>
+
       <!-- Action Row -->
       <div class="action-row">
-        <a href="dettaglio-conto.html" class="btn-text">Annulla</a>
+        <a href="dettaglio-conto.html" id="cancel-link" class="btn-text">Annulla</a>
         <button class="btn-filled" type="button" id="btn-salva" onclick="salva()">Salva</button>
       </div>
 
@@ -464,14 +470,16 @@
   </div>
 
   <script>
-    const CATEGORIE = {
-      uscita: [
-        'Casa', 'Spesa', 'Ristoranti', 'Trasporti',
-        'Salute', 'Abbigliamento', 'Svago', 'Istruzione',
-        'Abbonamenti', 'Altro'
-      ],
-      entrata: ['Stipendio', 'Rimborso', 'Regalo', 'Altro']
-    };
+    // Categorie fisse condivise da storage.js (una lista per tipo).
+    var contoId = new URLSearchParams(window.location.search).get('contoId');
+
+    // contoId mancante o inesistente → torna alla home.
+    if (!contoId || !getConto(contoId)) { window.location.replace('home.html'); }
+
+    // I link indietro/annulla tornano al dettaglio del conto corrente.
+    var backHref = 'dettaglio-conto.html?id=' + encodeURIComponent(contoId);
+    document.getElementById('back-link').href = backHref;
+    document.getElementById('cancel-link').href = backHref;
 
     let tipoCorrente = 'uscita';
 
@@ -502,22 +510,58 @@
       select.innerHTML = '';
       opzioni.forEach(function(cat) {
         const opt = document.createElement('option');
-        opt.value = cat.toLowerCase();
+        opt.value = cat;          // salva l'etichetta esatta (es. "Spesa")
         opt.textContent = cat;
         select.appendChild(opt);
       });
     }
 
     function impostaDataOggi() {
-      const oggi = new Date();
-      const anno = oggi.getFullYear();
-      const mese = String(oggi.getMonth() + 1).padStart(2, '0');
-      const giorno = String(oggi.getDate()).padStart(2, '0');
-      document.getElementById('data').value = anno + '-' + mese + '-' + giorno;
+      document.getElementById('data').value = new Date().toISOString().slice(0, 10);
+    }
+
+    function mostraErrore(msg) {
+      var el = document.getElementById('form-error');
+      el.textContent = msg;
+      el.hidden = false;
     }
 
     function salva() {
-      window.location.href = 'dettaglio-conto.html';
+      document.getElementById('form-error').hidden = true;
+
+      var importo = parseFloat(document.getElementById('importo').value);
+      var data = document.getElementById('data').value;
+      var categoria = document.getElementById('categoria').value;
+
+      // Validazione (ticket 04): importo > 0, data valida non troppo nel futuro, categoria obbligatoria.
+      if (isNaN(importo) || importo <= 0) {
+        mostraErrore("Inserisci un importo maggiore di zero.");
+        return;
+      }
+      if (!data) {
+        mostraErrore("Seleziona una data.");
+        return;
+      }
+      var oggi = new Date();
+      var limiteFuturo = new Date(oggi.getFullYear() + 1, oggi.getMonth(), oggi.getDate());
+      if (new Date(data) > limiteFuturo) {
+        mostraErrore("La data non può essere oltre un anno nel futuro.");
+        return;
+      }
+      if (!categoria) {
+        mostraErrore("Seleziona una categoria.");
+        return;
+      }
+
+      createMovimento({
+        contoId: contoId,
+        tipo: tipoCorrente,
+        importo: importo,
+        data: data,
+        categoria: categoria,
+        fonte: 'manuale'
+      });
+      window.location.href = backHref;
     }
 
     // Init

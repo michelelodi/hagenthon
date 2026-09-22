@@ -6,6 +6,8 @@
   <title>Nuovo conto — Finanze di Famiglia</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <script src="storage.js"></script>
+  <script>if (!isLoggedIn()) window.location.replace('login.html');</script>
   <style>
     :root {
       --md-primary: #0061A4;
@@ -355,20 +357,53 @@
         </div>
       </div>
 
+      <!-- Messaggio di errore inline -->
+      <p id="form-error" role="alert" hidden
+         style="color:var(--md-error);font-size:12px;margin-top:var(--spacing-sm);"></p>
+
       <!-- Action row -->
       <div class="action-row">
         <a href="home.html" class="btn-text">Annulla</a>
-        <button
-          class="btn-filled"
-          type="button"
-          onclick="window.location.href='dettaglio-conto-empty.html'"
-        >Crea conto</button>
+        <button class="btn-filled" type="button" id="btn-crea">Crea conto</button>
       </div>
 
     </main>
   </div>
 
   <script>
+    // ── Creazione conto (ticket 03) ──
+    (function () {
+      var inputNome = document.getElementById('input-nome');
+      var inputSaldo = document.getElementById('input-saldo');
+      var error = document.getElementById('form-error');
+
+      function mostraErrore(msg) {
+        error.textContent = msg;
+        error.hidden = false;
+      }
+
+      document.getElementById('btn-crea').addEventListener('click', function () {
+        error.hidden = true;
+        var nome = inputNome.value.trim();
+        var saldoRaw = inputSaldo.value.trim();
+
+        if (!nome) {
+          mostraErrore('Inserisci un nome per il conto.');
+          inputNome.focus();
+          return;
+        }
+        var saldo = Number(saldoRaw);
+        if (saldoRaw === '' || isNaN(saldo)) {
+          mostraErrore('Inserisci un saldo iniziale valido.');
+          inputSaldo.focus();
+          return;
+        }
+
+        var conto = createConto({ nome: nome, saldoIniziale: saldo });
+        window.location.href = 'dettaglio-conto.html?id=' + encodeURIComponent(conto.id);
+      });
+    })();
+
     // Floating label — mark field as filled when input has value
     function syncFilledState(inputEl, fieldEl) {
       if (inputEl.value.length > 0) {
