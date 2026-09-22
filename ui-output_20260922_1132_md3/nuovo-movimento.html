@@ -124,7 +124,7 @@
     .segmented-button-group {
       display: flex;
       width: 100%;
-      border-radius: var(--shape-full);
+      border-radius: 20px;
       overflow: hidden;
       border: 1px solid var(--md-outline);
       margin-bottom: var(--spacing-lg);
@@ -253,7 +253,8 @@
 
     .text-field__input:focus ~ .text-field__label,
     .text-field__input:not(:placeholder-shown) ~ .text-field__label,
-    .text-field__input[type="date"] ~ .text-field__label {
+    .text-field__input[type="date"] ~ .text-field__label,
+    .text-field__select ~ .text-field__label {
       top: 4px;
       font-size: 12px;
       transform: translateY(0);
