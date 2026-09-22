@@ -6,6 +6,8 @@
   <title>Importa da Telegram — Finanze di Famiglia</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <script src="storage.js"></script>
+  <script>if (!isLoggedIn()) window.location.replace('login.html');</script>
   <style>
     :root {
       --md-primary: #0061A4;
@@ -332,30 +334,9 @@
 
   let pendingItems = [];
 
+  // I conti vengono dallo storage condiviso (ff_conti).
   function conti() {
-    try {
-      return JSON.parse(localStorage.getItem('finanze_conti') || '[]');
-    } catch { return []; }
-  }
-
-  function movimenti() {
-    try {
-      return JSON.parse(localStorage.getItem('finanze_movimenti') || '[]');
-    } catch { return []; }
-  }
-
-  function salvaMovimento(mov) {
-    const list = movimenti();
-    list.push(mov);
-    localStorage.setItem('finanze_movimenti', JSON.stringify(list));
-
-    // Aggiorna saldo del conto
-    const cs = conti();
-    const conto = cs.find(c => c.id === mov.contoId);
-    if (conto) {
-      conto.saldo = (conto.saldo || conto.saldoIniziale || 0) + (mov.tipo === 'entrata' ? mov.importo : -mov.importo);
-      localStorage.setItem('finanze_conti', JSON.stringify(cs));
-    }
+    return getConti();
   }
 
   function snackbar(msg) {
@@ -387,7 +368,7 @@
       : '<option value="default">Conto principale</option>';
 
     const categorieLista = (item.tipo === 'entrata' ? CATEGORIE_ENTRATA : CATEGORIE_USCITA)
-      .map(c => `<option value="${c.toLowerCase()}" ${c.toLowerCase() === (item.categoria||'').toLowerCase() ? 'selected' : ''}>${c}</option>`)
+      .map(c => `<option value="${c}" ${c.toLowerCase() === (item.categoria||'').toLowerCase() ? 'selected' : ''}>${c}</option>`)
       .join('');
 
     const fiducia = item.fiducia ?? 1;
@@ -489,34 +470,40 @@
       descrizione: document.getElementById(`desc-${id}`)?.value?.trim() || 'Scontrino',
       importo: parseFloat(document.getElementById(`importo-${id}`)?.value) || 0,
       data: document.getElementById(`data-${id}`)?.value || new Date().toISOString().slice(0,10),
-      categoria: document.getElementById(`cat-${id}`)?.value || 'altro',
+      categoria: document.getElementById(`cat-${id}`)?.value || 'Altro',
       contoId: document.getElementById(`conto-${id}`)?.value || 'default',
     };
   }
 
   async function importaSingola(id) {
+    const campi = leggiCampi(id);
+
+    // Serve un conto reale in cui salvare il movimento.
+    if (!getConto(campi.contoId)) {
+      snackbar('⚠️ Crea prima un conto per importare');
+      return false;
+    }
+
     const btn = document.querySelector(`#card-${id} .btn-primary`);
     if (btn) btn.disabled = true;
 
-    const campi = leggiCampi(id);
     const item = pendingItems.find(i => i.id === id);
-    const mov = {
-      id: `mov_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
+    createMovimento({
+      contoId: campi.contoId,
       tipo: item?.tipo || 'uscita',
       importo: campi.importo,
-      descrizione: campi.descrizione,
       data: campi.data,
       categoria: campi.categoria,
-      contoId: campi.contoId,
+      descrizione: campi.descrizione,
       fonte: 'telegram',
-    };
-    salvaMovimento(mov);
+    });
 
     try { await fetch(`${BOT_API}/pending/${id}`, { method: 'DELETE' }); } catch {}
 
     pendingItems = pendingItems.filter(i => i.id !== id);
     aggiornaUI();
     snackbar('✅ Movimento importato');
+    return true;
   }
 
   async function scarta(id) {
@@ -527,9 +514,12 @@
   }
 
   async function importaTutte() {
-    const promises = [...pendingItems].map(item => importaSingola(item.id));
-    await Promise.all(promises);
-    snackbar('✅ Tutte le spese importate');
+    const results = await Promise.all([...pendingItems].map(item => importaSingola(item.id)));
+    const ok = results.filter(Boolean).length;
+    // Comunica solo ciò che è stato realmente importato (evita falsi positivi).
+    if (ok === results.length) snackbar('✅ Tutte le spese importate');
+    else if (ok > 0) snackbar(`✅ Importate ${ok} su ${results.length}`);
+    // se ok === 0, importaSingola ha già mostrato l'avviso "Crea prima un conto"
   }
 
   // Avvia caricamento

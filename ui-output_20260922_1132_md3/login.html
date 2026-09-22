@@ -6,6 +6,15 @@
   <title>Finanze di Famiglia — Accedi</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <!-- Livello dati condiviso: se è il primo avvio, popola lo scenario demo. -->
+  <script src="storage.js"></script>
+  <script>
+    // Auto-seed al primo caricamento (ticket 07): se non esistono ancora conti,
+    // carica lo scenario Sara & Marco così la demo parte già con dati reali.
+    if (getConti().length === 0) { seedDemo(); }
+    // Se l'utente è già loggato, salta il login.
+    if (isLoggedIn()) { window.location.replace('home.html'); }
+  </script>
   <style>
     :root {
       --md-primary: #0061A4;
@@ -219,6 +228,25 @@
       margin-top: var(--spacing-md);
     }
 
+    .login-note--link {
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      color: var(--md-secondary);
+    }
+
+    /* ── Inline error message ── */
+    .login-error {
+      font-family: var(--font);
+      font-weight: 400;
+      font-size: 12px;
+      color: var(--md-error);
+      margin-top: calc(-1 * var(--spacing-sm));
+      margin-bottom: var(--spacing-md);
+    }
+    .login-error[hidden] { display: none; }
+
     /* ── Responsive ── */
     @media (min-width: 600px) {
       .page-wrapper {
@@ -255,7 +283,7 @@
 
     <!-- MD3 Outlined Card -->
     <div class="login-card">
-      <form action="dashboard.html" method="get">
+      <form id="login-form" novalidate>
 
         <!-- MD3 Outlined TextField: Password -->
         <div class="text-field">
@@ -266,9 +294,13 @@
             name="password"
             placeholder=" "
             autocomplete="current-password"
+            aria-describedby="login-error"
           />
           <label class="text-field__label" for="password">Password</label>
         </div>
+
+        <!-- Messaggio di errore inline -->
+        <p id="login-error" class="login-error" role="alert" hidden>Password errata. Riprova.</p>
 
         <!-- MD3 Filled Button -->
         <button class="btn-filled" type="submit">Accedi</button>
@@ -279,6 +311,37 @@
     <!-- Body Medium note -->
     <p class="login-note">Accesso locale · i dati restano nel tuo browser</p>
 
+    <!-- Pulsante nascosto: reset rapido della demo (ticket 07) -->
+    <button id="reload-demo" class="login-note login-note--link" type="button">Ricarica dati demo</button>
+
   </div>
+
+  <script>
+    (function () {
+      var form = document.getElementById('login-form');
+      var input = document.getElementById('password');
+      var error = document.getElementById('login-error');
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (verifyPassword(input.value)) {
+          window.location.href = 'home.html';
+        } else {
+          error.hidden = false;
+          input.focus();
+          input.select();
+        }
+      });
+
+      // Reset demo: azzera tutto e ripopola lo scenario Sara & Marco.
+      document.getElementById('reload-demo').addEventListener('click', function () {
+        clearAll();
+        seedDemo();
+        error.hidden = true;
+        input.value = '';
+        input.focus();
+      });
+    })();
+  </script>
 </body>
 </html>

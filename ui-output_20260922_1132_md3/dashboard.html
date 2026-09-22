@@ -6,6 +6,8 @@
   <title>Dashboard – Finanze di Famiglia</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <script src="storage.js"></script>
+  <script>if (!isLoggedIn()) window.location.replace('login.html');</script>
   <style>
     /* ── CSS Tokens ─────────────────────────────────────────── */
     :root {
@@ -272,6 +274,35 @@
       margin-bottom: var(--spacing-md);
     }
 
+    /* ── Summary row (entrate / uscite) ── */
+    .summary-row {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .summary-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+      padding: var(--spacing-md);
+      background: var(--md-surface-variant);
+      border-radius: var(--shape-sm);
+    }
+
+    .summary-item__label {
+      font-size: 12px;
+      color: var(--md-on-surface-variant);
+    }
+
+    .summary-item__value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .summary-item__value--entrata { color: var(--md-success); }
+    .summary-item__value--uscita { color: var(--md-error); }
+
     /* ── Navigation Bar ─────────────────────────────────────── */
     .nav-bar {
       position: fixed;
@@ -366,90 +397,65 @@
     <!-- ── Top App Bar ── -->
     <header class="top-app-bar">
       <span class="top-app-bar__title">Dashboard</span>
-      <div class="filter-chip" role="group" aria-label="Filtra per conto">
+      <!-- Filtro conto: non interattivo nel MVP (sempre tutti i conti) -->
+      <div class="filter-chip" role="group" aria-label="Filtra per conto" aria-disabled="true"
+           style="opacity:0.6;cursor:default;">
         <span class="material-symbols-outlined" aria-hidden="true">filter_list</span>
-        <select aria-label="Seleziona conto">
-          <option>Tutti i conti</option>
-          <option>Conto Principale</option>
-          <option>Conto Risparmio</option>
-        </select>
+        <span class="filter-chip__label">Tutti i conti</span>
       </div>
     </header>
 
     <!-- ── Segmented Button — Periodo ── -->
     <div class="segmented-button" role="group" aria-label="Seleziona periodo">
-      <button class="segmented-button__option segmented-button__option--active" type="button" aria-pressed="true">Mese</button>
-      <button class="segmented-button__option" type="button" aria-pressed="false">Trimestre</button>
-      <button class="segmented-button__option" type="button" aria-pressed="false">Anno</button>
+      <button class="segmented-button__option segmented-button__option--active" type="button" data-periodo="mese" aria-pressed="true">Mese</button>
+      <button class="segmented-button__option" type="button" data-periodo="trimestre" aria-pressed="false">Trimestre</button>
+      <button class="segmented-button__option" type="button" data-periodo="anno" aria-pressed="false">Anno</button>
     </div>
 
     <!-- ── Card: Saldo totale ── -->
     <section class="card-elevated card-saldo" aria-label="Saldo totale">
       <p class="card-saldo__label">Saldo totale</p>
-      <p class="card-saldo__value">€ 2.579,70</p>
+      <p class="card-saldo__value" id="saldo-totale">€ 0,00</p>
     </section>
 
     <!-- ── Card: Spese per categoria ── -->
     <section class="card-elevated card-chart" aria-label="Spese per categoria">
       <h2 class="card-chart__title">Spese per categoria</h2>
-      <div class="chart-donut-wrapper">
-        <canvas id="pieChart" width="260" height="260" aria-label="Grafico a ciambella spese per categoria" role="img"></canvas>
-        <div class="chart-donut-center" aria-hidden="true">
-          <span class="chart-donut-center__label">Totale</span>
-          <span class="chart-donut-center__value">€ 1.448,70</span>
-        </div>
+
+      <!-- Empty state inline (nessun movimento nel periodo) -->
+      <div id="chart-empty" class="chart-empty" style="display:none;text-align:center;padding:var(--spacing-lg) 0;">
+        <span class="material-symbols-outlined" style="font-size:56px;color:var(--md-outline);">insert_chart</span>
+        <p style="font-size:14px;color:var(--md-on-surface-variant);margin-top:var(--spacing-sm);">
+          Nessun movimento in questo periodo.
+        </p>
       </div>
-      <!-- Custom legend -->
-      <div class="chart-legend" role="list" aria-label="Legenda categorie">
-        <div class="legend-item" role="listitem">
-          <span class="legend-dot" style="background-color:#0061A4;" aria-hidden="true"></span>
-          <div class="legend-text">
-            <span class="legend-name">Casa</span>
-            <span class="legend-meta">€ 800,00 · 55%</span>
+
+      <div id="chart-content">
+        <div class="chart-donut-wrapper">
+          <canvas id="pieChart" width="260" height="260" aria-label="Grafico a ciambella spese per categoria" role="img"></canvas>
+          <div class="chart-donut-center" aria-hidden="true">
+            <span class="chart-donut-center__label">Totale</span>
+            <span class="chart-donut-center__value" id="donut-total">€ 0,00</span>
           </div>
         </div>
-        <div class="legend-item" role="listitem">
-          <span class="legend-dot" style="background-color:#D1E4FF;" aria-hidden="true"></span>
-          <div class="legend-text">
-            <span class="legend-name">Spesa</span>
-            <span class="legend-meta">€ 320,00 · 22%</span>
-          </div>
-        </div>
-        <div class="legend-item" role="listitem">
-          <span class="legend-dot" style="background-color:#535F70;" aria-hidden="true"></span>
-          <div class="legend-text">
-            <span class="legend-name">Ristoranti</span>
-            <span class="legend-meta">€ 145,00 · 10%</span>
-          </div>
-        </div>
-        <div class="legend-item" role="listitem">
-          <span class="legend-dot" style="background-color:#73777F;" aria-hidden="true"></span>
-          <div class="legend-text">
-            <span class="legend-name">Trasporti</span>
-            <span class="legend-meta">€ 90,00 · 6%</span>
-          </div>
-        </div>
-        <div class="legend-item" role="listitem">
-          <span class="legend-dot" style="background-color:#1A1C1E;" aria-hidden="true"></span>
-          <div class="legend-text">
-            <span class="legend-name">Abbonamenti</span>
-            <span class="legend-meta">€ 38,70 · 3%</span>
-          </div>
-        </div>
-        <div class="legend-item" role="listitem">
-          <span class="legend-dot" style="background-color:#C3C7CF;" aria-hidden="true"></span>
-          <div class="legend-text">
-            <span class="legend-name">Altro</span>
-            <span class="legend-meta">€ 55,00 · 4%</span>
-          </div>
-        </div>
+        <!-- Custom legend (popolata da JS) -->
+        <div class="chart-legend" id="chart-legend" role="list" aria-label="Legenda categorie"></div>
       </div>
     </section>
 
-    <!-- ── Card: Trend mensile ── -->
-    <section class="card-elevated card-trend" aria-label="Trend mensile entrate e uscite">
-      <h2 class="card-trend__title">Trend mensile</h2>
-      <canvas id="barChart" aria-label="Grafico a barre trend mensile" role="img"></canvas>
+    <!-- ── Card: Entrate / Uscite del periodo ── -->
+    <section class="card-elevated card-trend" aria-label="Entrate e uscite del periodo">
+      <h2 class="card-trend__title">Entrate e uscite del periodo</h2>
+      <div class="summary-row">
+        <div class="summary-item">
+          <span class="summary-item__label">Entrate</span>
+          <span class="summary-item__value summary-item__value--entrata" id="tot-entrate">€ 0,00</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-item__label">Uscite</span>
+          <span class="summary-item__value summary-item__value--uscita" id="tot-uscite">€ 0,00</span>
+        </div>
+      </div>
     </section>
 
   </div><!-- /page-wrapper -->
@@ -474,34 +480,65 @@
     </div>
   </nav>
 
-  <!-- Chart.js CDN — must be before chart init scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Chart.js vendorizzato in locale: la demo deve girare 100% offline (CLAUDE.md). -->
+  <script src="chart.umd.min.js"></script>
 
   <script>
-    /* ── Segmented Button interaction ── */
-    document.querySelectorAll('.segmented-button__option').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.segmented-button__option').forEach(function(b) {
-          b.classList.remove('segmented-button__option--active');
-          b.setAttribute('aria-pressed', 'false');
-        });
-        btn.classList.add('segmented-button__option--active');
-        btn.setAttribute('aria-pressed', 'true');
+    // ── Palette fissa per categoria: colori coerenti tra chart e legenda ──
+    var COLORI_CATEGORIA = {
+      'Casa':          '#0061A4',
+      'Spesa':         '#4C9AD6',
+      'Ristoranti':    '#535F70',
+      'Trasporti':     '#7FA8C9',
+      'Salute':        '#B3261E',
+      'Abbigliamento': '#9C27B0',
+      'Svago':         '#F09300',
+      'Istruzione':    '#00796B',
+      'Abbonamenti':   '#1A1C1E',
+      'Altro':         '#C3C7CF'
+    };
+
+    function coloreCategoria(cat) {
+      return COLORI_CATEGORIA[cat] || '#C3C7CF';
+    }
+
+    var periodoCorrente = 'mese';
+    var pieChart = null;
+
+    function totali(movimenti) {
+      var entrate = 0, uscite = 0;
+      movimenti.forEach(function (m) {
+        if (m.tipo === 'entrata') entrate += Number(m.importo);
+        else uscite += Number(m.importo);
       });
-    });
+      return { entrate: entrate, uscite: uscite };
+    }
 
-    /* ── Doughnut chart — Spese per categoria ── */
-    (function() {
+    function renderLegenda(coppie, totaleUscite) {
+      var legend = document.getElementById('chart-legend');
+      legend.innerHTML = coppie.map(function (p) {
+        var pct = totaleUscite > 0 ? Math.round((p.valore / totaleUscite) * 100) : 0;
+        return '' +
+          '<div class="legend-item" role="listitem">' +
+            '<span class="legend-dot" style="background-color:' + coloreCategoria(p.categoria) + ';" aria-hidden="true"></span>' +
+            '<div class="legend-text">' +
+              '<span class="legend-name">' + p.categoria + '</span>' +
+              '<span class="legend-meta">' + formatEuro(p.valore) + ' · ' + pct + '%</span>' +
+            '</div>' +
+          '</div>';
+      }).join('');
+    }
+
+    function disegnaDonut(coppie) {
       var ctx = document.getElementById('pieChart').getContext('2d');
-
-      new Chart(ctx, {
+      if (pieChart) { pieChart.destroy(); }
+      pieChart = new Chart(ctx, {
         type: 'doughnut',
-        plugins: [],
         data: {
-          labels: ['Casa', 'Spesa', 'Ristoranti', 'Trasporti', 'Abbonamenti', 'Altro'],
+          labels: coppie.map(function (p) { return p.categoria; }),
           datasets: [{
-            data: [800, 320, 145, 90, 38.70, 55],
-            backgroundColor: ['#0061A4', '#D1E4FF', '#535F70', '#73777F', '#1A1C1E', '#C3C7CF'],
+            data: coppie.map(function (p) { return p.valore; }),
+            backgroundColor: coppie.map(function (p) { return coloreCategoria(p.categoria); }),
             borderColor: '#FDFCFF',
             borderWidth: 2,
             hoverOffset: 6
@@ -513,90 +550,67 @@
             legend: { display: false },
             tooltip: {
               callbacks: {
-                label: function(context) {
+                label: function (context) {
                   var value = context.parsed;
-                  var total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
-                  var pct = Math.round((value / total) * 100);
-                  return ' € ' + value.toFixed(2).replace('.', ',') + ' · ' + pct + '%';
+                  var total = context.dataset.data.reduce(function (a, b) { return a + b; }, 0);
+                  var pct = total > 0 ? Math.round((value / total) * 100) : 0;
+                  return ' ' + formatEuro(value) + ' · ' + pct + '%';
                 }
               }
             }
           }
         }
       });
-    })();
+    }
 
-    /* ── Bar chart — Trend mensile ── */
-    (function() {
-      var ctx = document.getElementById('barChart').getContext('2d');
+    function aggiorna() {
+      // Saldo totale = somma dei saldi di tutti i conti.
+      var saldoTot = getConti().reduce(function (s, c) { return s + Number(c.saldo); }, 0);
+      document.getElementById('saldo-totale').textContent = formatEuro(saldoTot);
 
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set'],
-          datasets: [
-            {
-              label: 'Entrate',
-              data: [1800, 1800, 2100, 1800, 1800, 1800],
-              backgroundColor: '#386A20',
-              borderRadius: 4,
-              borderSkipped: false
-            },
-            {
-              label: 'Uscite',
-              data: [1200, 1450, 1600, 980, 1320, 1449],
-              backgroundColor: '#BA1A1A',
-              borderRadius: 4,
-              borderSkipped: false
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              display: true,
-              position: 'top',
-              labels: {
-                font: { family: 'Roboto, sans-serif', size: 12 },
-                color: '#43474E',
-                usePointStyle: true,
-                pointStyle: 'circle',
-                padding: 16
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return ' ' + context.dataset.label + ': € ' +
-                    context.parsed.y.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                }
-              }
-            }
-          },
-          scales: {
-            x: {
-              grid: { display: false },
-              ticks: {
-                font: { family: 'Roboto, sans-serif', size: 12 },
-                color: '#43474E'
-              }
-            },
-            y: {
-              grid: { color: '#DFE2EB' },
-              border: { display: false },
-              ticks: {
-                font: { family: 'Roboto, sans-serif', size: 11 },
-                color: '#43474E',
-                callback: function(value) {
-                  return '€ ' + value.toLocaleString('it-IT');
-                }
-              }
-            }
-          }
-        }
+      var movimenti = filterByPeriodo(getMovimenti(), periodoCorrente, new Date());
+      var t = totali(movimenti);
+      document.getElementById('tot-entrate').textContent = formatEuro(t.entrate);
+      document.getElementById('tot-uscite').textContent = formatEuro(t.uscite);
+
+      var aggMap = aggregaUscitePerCategoria(movimenti);
+      var coppie = Array.from(aggMap.entries())
+        .map(function (e) { return { categoria: e[0], valore: e[1] }; })
+        .sort(function (a, b) { return b.valore - a.valore; });
+
+      var empty = document.getElementById('chart-empty');
+      var content = document.getElementById('chart-content');
+
+      if (movimenti.length === 0 || coppie.length === 0) {
+        // Nessun movimento (o nessuna uscita) nel periodo: svuota il chart e mostra l'empty state inline.
+        if (pieChart) { pieChart.destroy(); pieChart = null; }
+        content.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+
+      empty.style.display = 'none';
+      content.style.display = 'block';
+      document.getElementById('donut-total').textContent = formatEuro(t.uscite);
+      disegnaDonut(coppie);
+      renderLegenda(coppie, t.uscite);
+    }
+
+    // ── Segmented button: cambia periodo e ridisegna senza ricaricare ──
+    document.querySelectorAll('.segmented-button__option').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.segmented-button__option').forEach(function (b) {
+          b.classList.remove('segmented-button__option--active');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('segmented-button__option--active');
+        btn.setAttribute('aria-pressed', 'true');
+        periodoCorrente = btn.getAttribute('data-periodo');
+        aggiorna();
       });
-    })();
+    });
+
+    aggiorna();
   </script>
 </body>
 </html>

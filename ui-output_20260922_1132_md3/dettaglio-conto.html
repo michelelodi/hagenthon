@@ -6,6 +6,8 @@
   <title>Conto familiare — Finanze di Famiglia</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <script src="storage.js"></script>
+  <script>if (!isLoggedIn()) window.location.replace('login.html');</script>
   <style>
     :root {
       --md-primary: #0061A4;
@@ -329,126 +331,19 @@
         <a href="home.html" class="top-app-bar__back-btn" aria-label="Torna indietro">
           <span class="material-symbols-outlined">arrow_back</span>
         </a>
-        <span class="top-app-bar__title">Conto familiare</span>
+        <span class="top-app-bar__title" id="conto-nome">Conto</span>
       </div>
-      <div class="top-app-bar__sub-headline">€ 2.340,50</div>
+      <div class="top-app-bar__sub-headline" id="conto-saldo">€ 0,00</div>
     </header>
 
     <!-- Extended FAB: Nuovo movimento -->
-    <a href="nuovo-movimento.html" class="extended-fab" aria-label="Nuovo movimento">
+    <a href="nuovo-movimento.html" id="fab-nuovo" class="extended-fab" aria-label="Nuovo movimento">
       <span class="material-symbols-outlined">add</span>
       <span>Nuovo movimento</span>
     </a>
 
-    <!-- Lista movimenti -->
-    <ul class="movements-list" aria-label="Movimenti del conto">
-
-      <!-- Movimento 1: Spesa – Uscita -->
-      <li class="movement-item">
-        <div class="movement-item__leading">
-          <span class="chip chip--uscita">Uscita</span>
-        </div>
-        <div class="movement-item__content">
-          <div class="movement-item__headline">Spesa</div>
-          <div class="movement-item__supporting">22/09/2026</div>
-        </div>
-        <div class="movement-item__trailing">
-          <span class="movement-item__amount movement-item__amount--uscita">-€ 87,40</span>
-          <button
-            class="movement-item__delete-btn"
-            aria-label="Elimina movimento Spesa del 22/09/2026"
-            onclick="if(confirm('Eliminare?')) window.history.back()"
-          >
-            <span class="material-symbols-outlined">delete</span>
-          </button>
-        </div>
-      </li>
-
-      <!-- Movimento 2: Stipendio – Entrata -->
-      <li class="movement-item">
-        <div class="movement-item__leading">
-          <span class="chip chip--entrata">Entrata</span>
-        </div>
-        <div class="movement-item__content">
-          <div class="movement-item__headline">Stipendio</div>
-          <div class="movement-item__supporting">21/09/2026</div>
-        </div>
-        <div class="movement-item__trailing">
-          <span class="movement-item__amount movement-item__amount--entrata">+€ 1.800,00</span>
-          <button
-            class="movement-item__delete-btn"
-            aria-label="Elimina movimento Stipendio del 21/09/2026"
-            onclick="if(confirm('Eliminare?')) window.history.back()"
-          >
-            <span class="material-symbols-outlined">delete</span>
-          </button>
-        </div>
-      </li>
-
-      <!-- Movimento 3: Ristoranti – Uscita -->
-      <li class="movement-item">
-        <div class="movement-item__leading">
-          <span class="chip chip--uscita">Uscita</span>
-        </div>
-        <div class="movement-item__content">
-          <div class="movement-item__headline">Ristoranti</div>
-          <div class="movement-item__supporting">20/09/2026</div>
-        </div>
-        <div class="movement-item__trailing">
-          <span class="movement-item__amount movement-item__amount--uscita">-€ 34,00</span>
-          <button
-            class="movement-item__delete-btn"
-            aria-label="Elimina movimento Ristoranti del 20/09/2026"
-            onclick="if(confirm('Eliminare?')) window.history.back()"
-          >
-            <span class="material-symbols-outlined">delete</span>
-          </button>
-        </div>
-      </li>
-
-      <!-- Movimento 4: Abbonamenti – Uscita -->
-      <li class="movement-item">
-        <div class="movement-item__leading">
-          <span class="chip chip--uscita">Uscita</span>
-        </div>
-        <div class="movement-item__content">
-          <div class="movement-item__headline">Abbonamenti</div>
-          <div class="movement-item__supporting">19/09/2026</div>
-        </div>
-        <div class="movement-item__trailing">
-          <span class="movement-item__amount movement-item__amount--uscita">-€ 12,90</span>
-          <button
-            class="movement-item__delete-btn"
-            aria-label="Elimina movimento Abbonamenti del 19/09/2026"
-            onclick="if(confirm('Eliminare?')) window.history.back()"
-          >
-            <span class="material-symbols-outlined">delete</span>
-          </button>
-        </div>
-      </li>
-
-      <!-- Movimento 5: Trasporti – Uscita -->
-      <li class="movement-item">
-        <div class="movement-item__leading">
-          <span class="chip chip--uscita">Uscita</span>
-        </div>
-        <div class="movement-item__content">
-          <div class="movement-item__headline">Trasporti</div>
-          <div class="movement-item__supporting">18/09/2026</div>
-        </div>
-        <div class="movement-item__trailing">
-          <span class="movement-item__amount movement-item__amount--uscita">-€ 45,00</span>
-          <button
-            class="movement-item__delete-btn"
-            aria-label="Elimina movimento Trasporti del 18/09/2026"
-            onclick="if(confirm('Eliminare?')) window.history.back()"
-          >
-            <span class="material-symbols-outlined">delete</span>
-          </button>
-        </div>
-      </li>
-
-    </ul>
+    <!-- Lista movimenti (popolata da JS) -->
+    <ul class="movements-list" id="movements-list" aria-label="Movimenti del conto"></ul>
   </div>
 
   <!-- MD3 Navigation Bar -->
@@ -468,6 +363,75 @@
 
     </div>
   </nav>
+
+  <script>
+    // ── Dettaglio conto: lista movimenti (ticket 04) ──
+    (function () {
+      var id = new URLSearchParams(window.location.search).get('id');
+      var conto = id ? getConto(id) : null;
+
+      // id mancante o conto inesistente → torna alla home.
+      if (!conto) { window.location.replace('home.html'); return; }
+
+      document.getElementById('conto-nome').textContent = conto.nome;
+      document.getElementById('conto-saldo').textContent = formatEuro(conto.saldo);
+      document.getElementById('fab-nuovo').href =
+        'nuovo-movimento.html?contoId=' + encodeURIComponent(conto.id);
+
+      var movimenti = getMovimenti(conto.id);
+      // Nessun movimento → schermata empty dedicata.
+      if (movimenti.length === 0) {
+        window.location.replace('dettaglio-conto-empty.html?id=' + encodeURIComponent(conto.id));
+        return;
+      }
+
+      // Ordine cronologico inverso (per data, poi per createdAt).
+      movimenti.sort(function (a, b) {
+        if (a.data !== b.data) return a.data < b.data ? 1 : -1;
+        return (a.createdAt || '') < (b.createdAt || '') ? 1 : -1;
+      });
+
+      function escHtml(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      var list = document.getElementById('movements-list');
+      list.innerHTML = movimenti.map(function (m) {
+        var isEntrata = m.tipo === 'entrata';
+        var segno = isEntrata ? '+' : '-';
+        var headline = m.categoria + (m.descrizione ? ' · ' + m.descrizione : '');
+        var dataFmt = formatData(m.data);
+        return '' +
+          '<li class="movement-item">' +
+            '<div class="movement-item__leading">' +
+              '<span class="chip ' + (isEntrata ? 'chip--entrata' : 'chip--uscita') + '">' +
+                (isEntrata ? 'Entrata' : 'Uscita') + '</span>' +
+            '</div>' +
+            '<div class="movement-item__content">' +
+              '<div class="movement-item__headline">' + escHtml(headline) + '</div>' +
+              '<div class="movement-item__supporting">' + dataFmt + '</div>' +
+            '</div>' +
+            '<div class="movement-item__trailing">' +
+              '<span class="movement-item__amount movement-item__amount--' + (isEntrata ? 'entrata' : 'uscita') + '">' +
+                segno + ' ' + formatEuro(m.importo) + '</span>' +
+              '<button class="movement-item__delete-btn" data-id="' + m.id + '" ' +
+                'aria-label="Elimina movimento ' + escHtml(m.categoria) + ' del ' + dataFmt + '">' +
+                '<span class="material-symbols-outlined">delete</span>' +
+              '</button>' +
+            '</div>' +
+          '</li>';
+      }).join('');
+
+      list.addEventListener('click', function (e) {
+        var btn = e.target.closest('.movement-item__delete-btn');
+        if (!btn) return;
+        if (!confirm('Eliminare questo movimento?')) return;
+        deleteMovimento(btn.getAttribute('data-id'));
+        window.location.reload();
+      });
+    })();
+  </script>
 
 </body>
 </html>

@@ -6,6 +6,8 @@
   <title>Conto familiare — Finanze di Famiglia</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <script src="storage.js"></script>
+  <script>if (!isLoggedIn()) window.location.replace('login.html');</script>
   <style>
     :root {
       --md-primary: #0061A4;
@@ -265,8 +267,8 @@
           <span class="material-symbols-outlined">arrow_back</span>
         </a>
         <div class="top-app-bar__headline-group">
-          <span class="top-app-bar__title">Conto familiare</span>
-          <span class="top-app-bar__sub-headline">€ 1.500,00</span>
+          <span class="top-app-bar__title" id="conto-nome">Conto</span>
+          <span class="top-app-bar__sub-headline" id="conto-saldo">€ 0,00</span>
         </div>
       </div>
     </header>
@@ -278,10 +280,30 @@
       </div>
       <h1 class="empty-state__headline">Nessun movimento ancora</h1>
       <p class="empty-state__body">Aggiungi il primo movimento per questo conto</p>
-      <a href="nuovo-movimento.html" class="btn-tonal">Aggiungi il primo movimento</a>
+      <a href="nuovo-movimento.html" id="btn-nuovo" class="btn-tonal">Aggiungi il primo movimento</a>
     </main>
 
   </div>
+
+  <script>
+    // ── Empty state dettaglio conto (ticket 04) ──
+    (function () {
+      var id = new URLSearchParams(window.location.search).get('id');
+      var conto = id ? getConto(id) : null;
+      if (!conto) { window.location.replace('home.html'); return; }
+
+      // Se nel frattempo esistono movimenti, mostra la lista vera.
+      if (getMovimenti(conto.id).length > 0) {
+        window.location.replace('dettaglio-conto.html?id=' + encodeURIComponent(conto.id));
+        return;
+      }
+
+      document.getElementById('conto-nome').textContent = conto.nome;
+      document.getElementById('conto-saldo').textContent = formatEuro(conto.saldo);
+      document.getElementById('btn-nuovo').href =
+        'nuovo-movimento.html?contoId=' + encodeURIComponent(conto.id);
+    })();
+  </script>
 
   <!-- MD3 Navigation Bar -->
   <nav class="nav-bar" aria-label="Navigazione principale">
