@@ -451,6 +451,28 @@ function clearAll() {
   localStorage.removeItem(FF_AUTH);
 }
 
+// ── Migrazioni leggere sui dati già salvati ───────────────────────────────────
+// Rinomine di conti applicate in-place, SENZA cancellare i movimenti. Aggiorna
+// automaticamente localStorage esistenti quando cambia un nome nel seed.
+var RINOMINE_CONTI = {
+  'Carta di Credito': 'Conto Corrente Business'
+};
+
+function migraConti() {
+  var conti = getConti();
+  if (!conti.length) return;
+  var changed = false;
+  conti.forEach(function (c) {
+    if (RINOMINE_CONTI[c.nome]) { c.nome = RINOMINE_CONTI[c.nome]; changed = true; }
+  });
+  if (changed) writeJSON(FF_CONTI, conti);
+}
+
+// In browser, applica le migrazioni al caricamento di ogni pagina (idempotente).
+if (typeof window !== 'undefined') {
+  try { migraConti(); } catch (e) { /* no-op */ }
+}
+
 // ── Export per i test in Node (in browser `module` non esiste, il blocco è skippato) ──
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
@@ -473,6 +495,7 @@ if (typeof module !== 'undefined' && module.exports) {
     formatEuro: formatEuro,
     formatData: formatData,
     seedDemo: seedDemo,
-    clearAll: clearAll
+    clearAll: clearAll,
+    migraConti: migraConti
   };
 }
