@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buildArgs } from "../askclaude.mjs";
 
-const HYGIENE = ["-p", "--tools", "", "--no-session-persistence", "--permission-prompts", "none"];
+const HYGIENE = ["-p", "--tools", "", "--no-session-persistence", "--permission-mode", "default"];
 
 test("text + json (default): hygiene + output-format json + JSON nudge, no schema", () => {
   const args = buildArgs({ prompt: "hi" });

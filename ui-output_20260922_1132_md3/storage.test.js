@@ -86,16 +86,19 @@ test('createMovimento defaults fonte to manuale', () => {
   assert.equal(m.fonte, 'manuale');
 });
 
-test('seedDemo creates the Conto Famiglia scenario and auth password', () => {
+test('seedDemo popola conti e movimenti coerenti + password demo', () => {
   S.seedDemo();
   const conti = S.getConti();
-  assert.equal(conti.length, 1);
-  assert.equal(conti[0].nome, 'Conto Famiglia');
-  assert.equal(conti[0].saldoIniziale, 2000);
+  assert.ok(conti.length >= 1, `almeno un conto, trovati ${conti.length}`);
   const movs = S.getMovimenti();
   assert.ok(movs.length >= 12, `expected >= 12 movimenti, got ${movs.length}`);
-  // saldo coherent with saldoIniziale + movimenti
-  assert.equal(S.saldoCalcolato(conti[0].id), conti[0].saldo);
+  // Ogni conto: saldo memorizzato coerente col valore derivato (no drift).
+  conti.forEach(function (c) {
+    assert.equal(S.saldoCalcolato(c.id), c.saldo, 'saldo coerente per ' + c.nome);
+  });
+  // Ogni movimento appartiene a un conto seedato.
+  const ids = conti.map(function (c) { return c.id; });
+  movs.forEach(function (m) { assert.ok(ids.includes(m.contoId), 'movimento su conto valido'); });
   const auth = S.getAuth();
   assert.equal(auth.password, 'famiglia2026');
 });

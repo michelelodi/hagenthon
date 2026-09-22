@@ -35,7 +35,7 @@ export function buildArgs(request) {
     "-p",
     "--tools", "",
     "--no-session-persistence",
-    "--permission-prompts", "none",
+    "--permission-mode", "default",
   ];
 
   if (hasImages) {
