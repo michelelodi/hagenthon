@@ -42,7 +42,7 @@ test('spese > entrate genera un insight di warning', () => {
   assert.equal(ins.level, 'warning');
 });
 
-test('netto positivo genera un insight di risparmio', () => {
+test('netto positivo genera un insight di risparmio con tono di complimento', () => {
   const now = new Date('2026-09-22T10:00:00');
   const movimenti = [
     mov('c1', 'entrata', 2000, '2026-09-01', 'Stipendio'),
@@ -52,6 +52,26 @@ test('netto positivo genera un insight di risparmio', () => {
   const ins = r.insights.find(function (i) { return i.code === 'risparmio'; });
   assert.ok(ins);
   assert.equal(ins.level, 'positive');
+  // Deve essere un complimento esplicito e in evidenza (primo insight).
+  assert.match(ins.title + ' ' + ins.detail, /[Cc]omplimenti|[Oo]ttimo|[Bb]rav/);
+  assert.equal(r.insights[0].code, 'risparmio');
+});
+
+test('categoria in calo mese-su-mese genera un insight positivo', () => {
+  const now = new Date('2026-09-22T10:00:00');
+  const movimenti = [
+    mov('c1', 'entrata', 3000, '2026-09-01', 'Stipendio'),
+    // Ristoranti: 200 ad agosto → 80 a settembre (-60%)
+    mov('c1', 'uscita', 200, '2026-08-10', 'Ristoranti'),
+    mov('c1', 'uscita', 80, '2026-09-10', 'Ristoranti'),
+  ];
+  const r = A.analizza({ movimenti, conti: [], periodo: 'mese', now });
+  const calo = r.categorieInCalo.find(function (c) { return c.categoria === 'Ristoranti'; });
+  assert.ok(calo, 'Ristoranti in calo');
+  assert.equal(calo.precedente, 200);
+  assert.equal(calo.corrente, 80);
+  assert.ok(calo.deltaPct >= 0.59);
+  assert.ok(r.insights.some(function (i) { return i.code === 'categoria_calo' && i.level === 'positive'; }));
 });
 
 test('categoria in crescita mese-su-mese', () => {
