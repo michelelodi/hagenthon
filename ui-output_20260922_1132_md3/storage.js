@@ -136,6 +136,27 @@ function createMovimento(input) {
   return mov;
 }
 
+// Aggiorna i campi di un movimento e ricalcola il/i saldo/i coinvolti.
+function updateMovimento(id, patch) {
+  patch = patch || {};
+  var movimenti = readJSON(FF_MOVIMENTI, []);
+  var idx = movimenti.findIndex(function (m) { return m.id === id; });
+  if (idx === -1) return null;
+  var m = movimenti[idx];
+  var oldContoId = m.contoId;
+  if (patch.tipo !== undefined) m.tipo = patch.tipo === 'entrata' ? 'entrata' : 'uscita';
+  if (patch.importo !== undefined) m.importo = round2(Math.abs(toNumber(patch.importo)));
+  if (patch.data !== undefined) m.data = patch.data;
+  if (patch.categoria !== undefined) m.categoria = patch.categoria;
+  if (patch.descrizione !== undefined) m.descrizione = patch.descrizione || '';
+  if (patch.contoId !== undefined) m.contoId = patch.contoId;
+  movimenti[idx] = m;
+  writeJSON(FF_MOVIMENTI, movimenti);
+  ricalcolaSaldo(oldContoId);
+  if (m.contoId !== oldContoId) ricalcolaSaldo(m.contoId);
+  return m;
+}
+
 function deleteMovimento(id) {
   var movimenti = readJSON(FF_MOVIMENTI, []);
   var mov = movimenti.find(function (m) { return m.id === id; });
@@ -484,6 +505,7 @@ if (typeof module !== 'undefined' && module.exports) {
     saldoCalcolato: saldoCalcolato,
     getMovimenti: getMovimenti,
     createMovimento: createMovimento,
+    updateMovimento: updateMovimento,
     deleteMovimento: deleteMovimento,
     periodoRange: periodoRange,
     filterByPeriodo: filterByPeriodo,

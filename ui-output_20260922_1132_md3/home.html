@@ -213,16 +213,36 @@
     .mv-item {
       display: flex;
       align-items: center;
-      gap: var(--spacing-sm);
+      gap: var(--spacing-xs);
       padding: var(--spacing-sm) var(--spacing-md);
       border-bottom: 1px solid var(--md-outline-variant);
-      text-decoration: none;
-      color: inherit;
     }
     .mv-item:last-child { border-bottom: none; }
     .mv-item:hover { background: color-mix(in srgb, var(--md-primary) 5%, transparent); }
 
-    .mv-item__body { flex: 1; min-width: 0; }
+    .mv-item__link {
+      flex: 1;
+      min-width: 0;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .mv-item__btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--shape-full);
+      border: none;
+      background: transparent;
+      color: var(--md-on-surface-variant);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .mv-item__btn:hover { background: var(--md-surface-variant); }
+    .mv-item__btn .material-symbols-outlined { font-size: 20px; }
 
     .mv-item__row1 {
       display: flex;
@@ -523,22 +543,42 @@
         var cat = escHtml(m.categoria || 'Altro');
         var desc = m.descrizione ? ' · ' + escHtml(m.descrizione) : '';
         var conto = escHtml(nomeById[m.contoId] || 'Conto');
+        var dataFmt = formatData(m.data);
         return '' +
-          '<a class="mv-item" href="dettaglio-conto.html?id=' + encodeURIComponent(m.contoId) + '">' +
-            '<div class="mv-item__body">' +
+          '<li class="mv-item">' +
+            '<a class="mv-item__link" href="dettaglio-conto.html?id=' + encodeURIComponent(m.contoId) + '">' +
               '<div class="mv-item__row1">' +
                 '<span class="mv-item__cat">' + cat + '</span>' +
                 '<span class="mv-item__conto">' + conto + '</span>' +
               '</div>' +
-              '<div class="mv-item__meta">' + formatData(m.data) + desc + '</div>' +
-            '</div>' +
+              '<div class="mv-item__meta">' + dataFmt + desc + '</div>' +
+            '</a>' +
             '<span class="mv-item__amount mv-item__amount--' + (isEntrata ? 'entrata' : 'uscita') + '">' +
               segno + ' ' + formatEuro(m.importo) + '</span>' +
-          '</a>';
+            '<button class="mv-item__btn" data-edit="' + m.id + '" aria-label="Modifica">' +
+              '<span class="material-symbols-outlined">edit</span></button>' +
+            '<button class="mv-item__btn" data-del="' + m.id + '" aria-label="Elimina">' +
+              '<span class="material-symbols-outlined">delete</span></button>' +
+          '</li>';
       }).join('');
     }
     renderConti();
     renderMovimenti();
+
+    // Modifica / elimina dalla lista unificata dei movimenti.
+    document.getElementById('all-movements').addEventListener('click', function (e) {
+      var edit = e.target.closest('[data-edit]');
+      if (edit) {
+        window.location.href = 'nuovo-movimento.html?movId=' + encodeURIComponent(edit.getAttribute('data-edit')) + '&back=home';
+        return;
+      }
+      var del = e.target.closest('[data-del]');
+      if (!del) return;
+      if (!confirm('Eliminare questo movimento?')) return;
+      deleteMovimento(del.getAttribute('data-del'));
+      renderConti();
+      renderMovimenti();
+    });
 
     async function checkTelegramPending() {
       try {
