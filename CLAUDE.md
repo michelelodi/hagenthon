@@ -8,7 +8,7 @@ Si vince su **(1) idea** e **(2) qualità della costruzione agentica**. Tra i **
 
 ## Confini non negoziabili
 
-> ⚠️ **Deviazione di progetto — vedi [ADR-0001](docs/adr/0001-webapp-tradizionale-senza-llm.md).** Questo progetto costruisce una **webapp tradizionale di finanze personali, SENZA LLM a runtime**, **solo frontend + `localStorage`**, offline nel browser. I confini "LLM nel prodotto", "Solo Claude / inferenza offline" e "capability che chiude il loop fino all'azione" **NON si applicano** e sono superati da quell'ADR. `tools/askclaude/` resta inutilizzato dal prodotto.
+> ⚠️ **Deviazione di progetto — vedi [ADR-0001](docs/adr/0001-webapp-tradizionale-senza-llm.md) e [ADR-0002](docs/adr/0002-report-ai-opzionale-via-askclaude.md).** Questo progetto costruisce una **webapp tradizionale di finanze personali**, **solo frontend + `localStorage`**, offline nel browser. Il **core** (login → conti → movimenti → dashboard → insight deterministici) è **SENZA LLM a runtime** e gira 100% offline. In deroga parziale (ADR-0002), `tools/askclaude/` **è usato dal prodotto** per un **report AI opzionale on-demand** (extra online via `report-server/`), che **non** entra nella demo dei 90s. I confini "LLM nel prodotto", "Solo Claude / inferenza offline" e "capability che chiude il loop fino all'azione" restano superati dagli ADR.
 
 - **Una persona, una difficoltà.** Sempre ancorati a *un* profilo concreto e *una* barriera precisa in uno scenario reale/realistico. Mai "utente generico". → **Persona scelta: Sara & Marco** (famiglia, un conto familiare); barriera = onere dell'inserimento manuale.
 - **Semplificare senza tradire.** Non alterare il significato delle informazioni originali. Niente consulenza professionale personalizzata (finanziaria, medica, legale).

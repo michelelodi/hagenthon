@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
   <script src="storage.js"></script>
   <script>if (!isLoggedIn()) window.location.replace('login.html');</script>
+  <script src="analysis.js"></script>
   <style>
     /* ── CSS Tokens ─────────────────────────────────────────── */
     :root {
@@ -274,6 +275,94 @@
       margin-bottom: var(--spacing-md);
     }
 
+    /* ── Card Analisi ── */
+    .card-analisi { padding: var(--spacing-md); }
+
+    .card-analisi__title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--md-on-surface);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .insights-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+
+    .insight {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--shape-sm);
+      border-left: 4px solid var(--md-outline);
+      background: var(--md-surface-variant);
+    }
+
+    .insight--warning { border-left-color: var(--md-error); }
+    .insight--positive { border-left-color: var(--md-success); }
+    .insight--info { border-left-color: var(--md-primary); }
+
+    .insight .material-symbols-outlined {
+      font-size: 20px;
+      flex-shrink: 0;
+      color: var(--md-on-surface-variant);
+    }
+    .insight--warning .material-symbols-outlined { color: var(--md-error); }
+    .insight--positive .material-symbols-outlined { color: var(--md-success); }
+    .insight--info .material-symbols-outlined { color: var(--md-primary); }
+
+    .insight__title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-on-surface);
+    }
+    .insight__detail {
+      font-size: 12px;
+      color: var(--md-on-surface-variant);
+      margin-top: 2px;
+    }
+
+    /* ── Report AI ── */
+    .report-block { margin-top: var(--spacing-md); }
+
+    .btn-report {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      padding: 10px var(--spacing-lg);
+      border: none;
+      border-radius: 20px;
+      background: var(--md-primary);
+      color: var(--md-on-primary);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: var(--elevation-1);
+      transition: background 0.2s;
+    }
+    .btn-report:hover { background: #1a71b0; }
+    .btn-report:disabled { opacity: 0.6; cursor: default; }
+    .btn-report .material-symbols-outlined { font-size: 18px; }
+
+    .report-out {
+      margin-top: var(--spacing-md);
+      padding: var(--spacing-md);
+      background: var(--md-primary-container);
+      color: var(--md-on-primary-container);
+      border-radius: var(--shape-md);
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .report-out--error {
+      background: var(--md-surface-variant);
+      color: var(--md-on-surface-variant);
+    }
+
     /* ── Summary row (entrate / uscite) ── */
     .summary-row {
       display: flex;
@@ -417,6 +506,20 @@
       <p class="card-saldo__value" id="saldo-totale">€ 0,00</p>
     </section>
 
+    <!-- ── Card: Analisi (insight live + report AI on-demand) ── -->
+    <section class="card-elevated card-analisi" aria-label="Analisi delle finanze">
+      <h2 class="card-analisi__title">Analisi</h2>
+      <div id="insights-list" class="insights-list"><!-- popolato da JS --></div>
+
+      <div class="report-block">
+        <button id="btn-report" class="btn-report" type="button">
+          <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
+          Genera report AI
+        </button>
+        <div id="report-out" class="report-out" hidden></div>
+      </div>
+    </section>
+
     <!-- ── Card: Spese per categoria ── -->
     <section class="card-elevated card-chart" aria-label="Spese per categoria">
       <h2 class="card-chart__title">Spese per categoria</h2>
@@ -504,6 +607,28 @@
     var periodoCorrente = 'mese';
     var contoFilter = '';   // '' = tutti i conti
     var pieChart = null;
+    var ultimaAnalisi = null;       // ultimo risultato di analizza() per il report AI
+    var REPORT_API = 'http://localhost:3002';
+
+    function escHtmlDash(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Rende gli insight deterministici (istantanei, offline).
+    function renderInsights(insights) {
+      var box = document.getElementById('insights-list');
+      box.innerHTML = insights.map(function (i) {
+        return '' +
+          '<div class="insight insight--' + i.level + '">' +
+            '<span class="material-symbols-outlined" aria-hidden="true">' + escHtmlDash(i.icon) + '</span>' +
+            '<div>' +
+              '<div class="insight__title">' + escHtmlDash(i.title) + '</div>' +
+              '<div class="insight__detail">' + escHtmlDash(i.detail) + '</div>' +
+            '</div>' +
+          '</div>';
+      }).join('');
+    }
 
     // Popola il filtro conto: "Tutti i conti" + un'opzione per ogni conto.
     (function popolaFiltroConti() {
@@ -590,6 +715,16 @@
         : conti.reduce(function (s, c) { return s + Number(c.saldo); }, 0);
       document.getElementById('saldo-totale').textContent = formatEuro(saldoTot);
 
+      // Analisi deterministica live (insight istantanei, offline).
+      ultimaAnalisi = analizza({
+        movimenti: getMovimenti(),
+        conti: conti,
+        periodo: periodoCorrente,
+        contoId: contoFilter || '',
+        now: new Date()
+      });
+      renderInsights(ultimaAnalisi.insights);
+
       // Movimenti del conto selezionato (o di tutti), filtrati per periodo.
       var movimenti = filterByPeriodo(getMovimenti(contoFilter || undefined), periodoCorrente, new Date());
       var t = totali(movimenti);
@@ -631,6 +766,39 @@
         periodoCorrente = btn.getAttribute('data-periodo');
         aggiorna();
       });
+    });
+
+    // ── Report AI on-demand (extra online via report-server + askclaude) ──
+    document.getElementById('btn-report').addEventListener('click', async function () {
+      var btn = this;
+      var out = document.getElementById('report-out');
+      btn.disabled = true;
+      var testoOriginale = btn.innerHTML;
+      btn.innerHTML = '<span class="material-symbols-outlined">hourglass_top</span> Genero…';
+      out.hidden = false;
+      out.className = 'report-out';
+      out.textContent = 'Sto analizzando i tuoi dati…';
+
+      try {
+        var res = await fetch(REPORT_API + '/report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ analysis: ultimaAnalisi }),
+          signal: AbortSignal.timeout(50000)
+        });
+        var data = await res.json();
+        if (!res.ok || !data.ok) throw new Error((data && data.error) || ('HTTP ' + res.status));
+        out.className = 'report-out';
+        out.textContent = data.report;
+      } catch (e) {
+        out.className = 'report-out report-out--error';
+        out.textContent = 'Report non disponibile: il server non risponde su localhost:3002. ' +
+          'Avvialo con "node report-server/server.mjs" (richiede il CLI claude). ' +
+          'Gli insight qui sopra restano sempre disponibili offline.';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = testoOriginale;
+      }
     });
 
     aggiorna();
