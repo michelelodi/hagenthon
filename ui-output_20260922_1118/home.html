@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>I tuoi conti — Finanze di Famiglia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&family=Lora:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #0066CC;
+      --color-primary-dark: #002244;
+      --color-background: #FFFFFF;
+      --color-surface: #F2F7FC;
+      --color-text: #0E1B26;
+      --color-text-muted: #5A6772;
+      --color-border: #CCD8E0;
+      --color-error: #D32F2F;
+      --color-success: #2E7D32;
+
+      --font-primary: 'Titillium Web', sans-serif;
+      --font-secondary: 'Lora', serif;
+
+      --size-xs: 0.75rem;
+      --size-sm: 0.875rem;
+      --size-md: 1rem;
+      --size-lg: 1.125rem;
+      --size-xl: 1.375rem;
+      --size-2xl: 1.75rem;
+
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+
+      --border-radius-sm: 4px;
+      --border-radius-md: 8px;
+      --border-radius-lg: 16px;
+
+      --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.08);
+
+      --bottom-nav-height: 64px;
+    }
+
+    /* Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font-primary);
+      font-size: var(--size-md);
+      color: var(--color-text);
+      background-color: var(--color-surface);
+      line-height: 1.5;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* Page container */
+    .page {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: var(--color-surface);
+      min-height: 100vh;
+      padding-bottom: var(--bottom-nav-height);
+      position: relative;
+    }
+
+    /* Header */
+    .site-header {
+      background-color: var(--color-primary-dark);
+      padding: var(--spacing-md) var(--spacing-xl);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-md);
+    }
+
+    .site-header__title {
+      font-family: var(--font-primary);
+      font-weight: 700;
+      font-size: var(--size-xl);
+      color: var(--color-background);
+      flex: 1;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-primary);
+      font-weight: 600;
+      font-size: var(--size-sm);
+      border-radius: var(--border-radius-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+      border: 2px solid transparent;
+    }
+
+    .btn--outline-white {
+      background-color: transparent;
+      color: var(--color-background);
+      border-color: var(--color-background);
+    }
+
+    .btn--outline-white:hover,
+    .btn--outline-white:focus {
+      background-color: var(--color-background);
+      color: var(--color-primary-dark);
+      outline: none;
+    }
+
+    .btn--outline-white:focus-visible {
+      outline: 3px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    /* Main content */
+    .main-content {
+      padding: var(--spacing-md);
+    }
+
+    /* Account card list */
+    .account-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+
+    /* Account card */
+    .account-card {
+      display: block;
+      background-color: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-md) var(--spacing-lg);
+      box-shadow: var(--shadow-card);
+      cursor: pointer;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .account-card:hover {
+      border-color: var(--color-primary);
+      box-shadow: 0 2px 8px rgba(0, 102, 204, 0.15);
+    }
+
+    .account-card:focus-visible {
+      outline: 3px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    .account-card__name {
+      font-family: var(--font-primary);
+      font-weight: 600;
+      font-size: var(--size-lg);
+      color: var(--color-text);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .account-card__balance-label {
+      font-family: var(--font-primary);
+      font-weight: 400;
+      font-size: var(--size-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .account-card__balance {
+      font-family: var(--font-primary);
+      font-weight: 700;
+      font-size: var(--size-xl);
+      color: var(--color-primary);
+    }
+
+    /* Bottom navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: var(--color-background);
+      border-top: 1px solid var(--color-border);
+      height: var(--bottom-nav-height);
+      display: flex;
+      align-items: stretch;
+      z-index: 100;
+    }
+
+    .bottom-nav__inner {
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .bottom-nav__item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-xs);
+      color: var(--color-text-muted);
+      font-family: var(--font-primary);
+      font-weight: 600;
+      font-size: var(--size-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: var(--spacing-sm);
+      transition: color 0.2s;
+      border: none;
+      background: none;
+    }
+
+    .bottom-nav__item:hover {
+      color: var(--color-primary);
+    }
+
+    .bottom-nav__item:focus-visible {
+      outline: 3px solid var(--color-primary);
+      outline-offset: -3px;
+    }
+
+    .bottom-nav__item--active {
+      color: var(--color-primary);
+    }
+
+    .bottom-nav__icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .site-header {
+        padding: var(--spacing-md);
+      }
+
+      .site-header__title {
+        font-size: var(--size-lg);
+      }
+
+      .main-content {
+        padding: var(--spacing-md) var(--spacing-sm);
+      }
+
+      .account-card {
+        padding: var(--spacing-md);
+      }
+    }
+
+    @media (max-width: 375px) {
+      .site-header__title {
+        font-size: var(--size-md);
+      }
+
+      .btn {
+        font-size: var(--size-xs);
+        padding: var(--spacing-xs) var(--spacing-sm);
+      }
+
+      .account-card__balance {
+        font-size: var(--size-lg);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .page { max-width: 900px; }
+    }
+    @media (min-width: 1280px) {
+      .page { max-width: 1024px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <header class="site-header">
+      <h1 class="site-header__title">I tuoi conti</h1>
+      <a href="nuovo-conto.html" class="btn btn--outline-white">
+        + Nuovo conto
+      </a>
+    </header>
+
+    <main class="main-content">
+      <div class="account-list">
+
+        <a href="dettaglio-conto.html" class="account-card">
+          <div class="account-card__name">Conto familiare</div>
+          <div class="account-card__balance-label">Saldo disponibile</div>
+          <div class="account-card__balance">€ 2.340,50</div>
+        </a>
+
+        <a href="dettaglio-conto.html" class="account-card">
+          <div class="account-card__name">Contanti</div>
+          <div class="account-card__balance-label">Saldo disponibile</div>
+          <div class="account-card__balance">€ 150,00</div>
+        </a>
+
+        <a href="dettaglio-conto.html" class="account-card">
+          <div class="account-card__name">Carta prepagata</div>
+          <div class="account-card__balance-label">Saldo disponibile</div>
+          <div class="account-card__balance">€ 89,20</div>
+        </a>
+
+      </div>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Navigazione principale">
+      <div class="bottom-nav__inner">
+
+        <a href="dashboard.html" class="bottom-nav__item" aria-label="Dashboard">
+          <svg class="bottom-nav__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 12 L12 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M12 12 L17 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+            <path d="M5.5 17 Q8 13 12 13 Q16 13 18.5 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          </svg>
+          Dashboard
+        </a>
+
+        <a href="home.html" class="bottom-nav__item bottom-nav__item--active" aria-label="Conti" aria-current="page">
+          <svg class="bottom-nav__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M2 11h20" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M6 3h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <rect x="5" y="15" width="4" height="2" rx="1" fill="currentColor"/>
+          </svg>
+          Conti
+        </a>
+
+      </div>
+    </nav>
+
+  </div>
+</body>
+</html>

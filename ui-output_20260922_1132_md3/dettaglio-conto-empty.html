@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conto familiare — Finanze di Famiglia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <style>
+    :root {
+      --md-primary: #0061A4;
+      --md-on-primary: #FFFFFF;
+      --md-primary-container: #D1E4FF;
+      --md-on-primary-container: #001D36;
+      --md-secondary: #535F70;
+      --md-on-secondary: #FFFFFF;
+      --md-secondary-container: #D7E3F7;
+      --md-on-secondary-container: #101C2B;
+      --md-surface: #FDFCFF;
+      --md-surface-variant: #DFE2EB;
+      --md-on-surface: #1A1C1E;
+      --md-on-surface-variant: #43474E;
+      --md-outline: #73777F;
+      --md-outline-variant: #C3C7CF;
+      --md-error: #BA1A1A;
+      --md-inverse-surface: #2F3033;
+      --md-inverse-on-surface: #F1F0F4;
+      --font: 'Roboto', sans-serif;
+      --shape-xs: 4px;
+      --shape-sm: 8px;
+      --shape-md: 12px;
+      --shape-lg: 16px;
+      --shape-xl: 28px;
+      --shape-full: 50%;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --spacing-2xl: 48px;
+      --elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+      --elevation-2: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
+      --nav-bar-height: 80px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--md-surface);
+      color: var(--md-on-surface);
+      padding-bottom: var(--nav-bar-height);
+    }
+
+    .page-wrapper {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ── MD3 Top App Bar – Medium ── */
+    .top-app-bar {
+      background: var(--md-surface);
+      padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
+    }
+
+    .top-app-bar__row-leading {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      min-height: 64px;
+    }
+
+    .top-app-bar__back {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: var(--shape-full);
+      color: var(--md-on-surface);
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .top-app-bar__back:hover {
+      background: rgba(26, 28, 30, 0.08);
+    }
+
+    .top-app-bar__back .material-symbols-outlined {
+      font-size: 24px;
+    }
+
+    .top-app-bar__headline-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .top-app-bar__title {
+      font-size: 22px;
+      font-weight: 400;
+      line-height: 1.27;
+      color: var(--md-on-surface);
+    }
+
+    .top-app-bar__sub-headline {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.14;
+      color: var(--md-primary);
+    }
+
+    /* ── MD3 Empty State ── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding-top: var(--spacing-2xl);
+      padding-left: var(--spacing-md);
+      padding-right: var(--spacing-md);
+      text-align: center;
+    }
+
+    .empty-state__icon .material-symbols-outlined {
+      font-size: 80px;
+      color: var(--md-outline);
+      display: block;
+    }
+
+    .empty-state__headline {
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 1.33;
+      color: var(--md-on-surface);
+      margin-top: var(--spacing-lg);
+    }
+
+    .empty-state__body {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.43;
+      color: var(--md-on-surface-variant);
+      max-width: 280px;
+      margin-top: var(--spacing-sm);
+    }
+
+    /* ── MD3 Filled Tonal Button ── */
+    .btn-tonal {
+      display: inline-block;
+      background: var(--md-secondary-container, var(--md-primary-container));
+      color: var(--md-on-primary-container);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.43;
+      letter-spacing: 0.1px;
+      border-radius: var(--shape-full);
+      padding: 10px 24px;
+      text-decoration: none;
+      margin-top: var(--spacing-lg);
+      border: none;
+      cursor: pointer;
+      transition: background 150ms ease, box-shadow 150ms ease;
+    }
+
+    .btn-tonal:hover {
+      box-shadow: var(--elevation-1);
+      background: color-mix(in srgb, var(--md-secondary-container, var(--md-primary-container)) 92%, var(--md-on-primary-container));
+    }
+
+    .btn-tonal:active {
+      box-shadow: none;
+      background: color-mix(in srgb, var(--md-secondary-container, var(--md-primary-container)) 88%, var(--md-on-primary-container));
+    }
+
+    /* ── MD3 Navigation Bar (fixed bottom) ── */
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-bar-height);
+      background: var(--md-surface-variant);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 var(--spacing-sm);
+      box-shadow: 0 -1px 0 var(--md-outline-variant);
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-xs);
+      text-decoration: none;
+      color: var(--md-on-surface-variant);
+      flex: 1;
+      padding: var(--spacing-sm) 0;
+    }
+
+    .nav-item__indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 32px;
+      border-radius: var(--shape-full);
+      transition: background 150ms ease;
+    }
+
+    .nav-item .material-symbols-outlined {
+      font-size: 24px;
+    }
+
+    .nav-item__label {
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.33;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-item--active {
+      color: var(--md-on-surface);
+    }
+
+    .nav-item--active .nav-item__indicator {
+      background: var(--md-primary-container);
+    }
+
+    .nav-item--active .material-symbols-outlined {
+      color: var(--md-on-primary-container);
+      font-variation-settings: 'FILL' 1;
+    }
+
+    .nav-item:not(.nav-item--active):hover .nav-item__indicator {
+      background: rgba(26, 28, 30, 0.08);
+    }
+  
+    @media (min-width: 840px) {
+      .page-wrapper { max-width: 840px; }
+    }
+    @media (min-width: 1240px) {
+      .page-wrapper { max-width: 1024px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <!-- MD3 Top App Bar – Medium -->
+    <header class="top-app-bar">
+      <div class="top-app-bar__row-leading">
+        <a href="home.html" class="top-app-bar__back" aria-label="Torna ai conti">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </a>
+        <div class="top-app-bar__headline-group">
+          <span class="top-app-bar__title">Conto familiare</span>
+          <span class="top-app-bar__sub-headline">€ 1.500,00</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- MD3 Empty State -->
+    <main class="empty-state">
+      <div class="empty-state__icon" aria-hidden="true">
+        <span class="material-symbols-outlined">receipt_long</span>
+      </div>
+      <h1 class="empty-state__headline">Nessun movimento ancora</h1>
+      <p class="empty-state__body">Aggiungi il primo movimento per questo conto</p>
+      <a href="nuovo-movimento.html" class="btn-tonal">Aggiungi il primo movimento</a>
+    </main>
+
+  </div>
+
+  <!-- MD3 Navigation Bar -->
+  <nav class="nav-bar" aria-label="Navigazione principale">
+    <a href="dashboard.html" class="nav-item" aria-label="Dashboard">
+      <div class="nav-item__indicator">
+        <span class="material-symbols-outlined">dashboard</span>
+      </div>
+      <span class="nav-item__label">Dashboard</span>
+    </a>
+    <a href="home.html" class="nav-item nav-item--active" aria-label="Conti" aria-current="page">
+      <div class="nav-item__indicator">
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+      </div>
+      <span class="nav-item__label">Conti</span>
+    </a>
+  </nav>
+
+</body>
+</html>

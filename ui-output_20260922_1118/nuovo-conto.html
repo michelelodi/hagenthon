@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nuovo conto — Finanze di Famiglia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Design Tokens ─────────────────────────────────────────── */
+    :root {
+      --color-primary:        #0066CC;
+      --color-primary-dark:   #002244;
+      --color-background:     #FFFFFF;
+      --color-surface:        #F2F7FC;
+      --color-text:           #0E1B26;
+      --color-text-muted:     #5A6772;
+      --color-border:         #CCD8E0;
+      --color-error:          #D32F2F;
+
+      --font-sans:  'Titillium Web', sans-serif;
+      --font-serif: 'Lora', serif;
+
+      --size-xs:   0.75rem;   /* 12px */
+      --size-sm:   0.875rem;  /* 14px */
+      --size-md:   1rem;      /* 16px */
+      --size-lg:   1.25rem;   /* 20px */
+      --size-xl:   1.5rem;    /* 24px */
+      --size-2xl:  2rem;      /* 32px */
+
+      --spacing-xs:  0.25rem;
+      --spacing-sm:  0.5rem;
+      --spacing-md:  1rem;
+      --spacing-lg:  1.5rem;
+      --spacing-xl:  2rem;
+      --spacing-2xl: 3rem;
+
+      --border-radius-sm: 4px;
+      --border-radius-md: 8px;
+    }
+
+    /* ── Reset & Base ──────────────────────────────────────────── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      font-size: var(--size-md);
+      color: var(--color-text);
+      background-color: var(--color-surface);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Layout Wrapper ────────────────────────────────────────── */
+    .page-wrapper {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── Header / Istituzionale ────────────────────────────────── */
+    .site-header {
+      background-color: var(--color-primary-dark);
+      padding: var(--spacing-md) var(--spacing-xl);
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .breadcrumb a {
+      font-family: var(--font-sans);
+      font-size: var(--size-sm);
+      color: #FFFFFF;
+      text-decoration: none;
+      opacity: 0.85;
+      transition: opacity 0.2s;
+    }
+
+    .breadcrumb a:hover,
+    .breadcrumb a:focus {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    .breadcrumb a:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+      border-radius: var(--border-radius-sm);
+    }
+
+    /* Page Title */
+    .site-header__title {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: var(--size-xl);
+      color: #FFFFFF;
+      line-height: 1.2;
+    }
+
+    /* ── Main Content ──────────────────────────────────────────── */
+    .main-content {
+      flex: 1;
+      padding: var(--spacing-lg);
+    }
+
+    /* ── Form Card ─────────────────────────────────────────────── */
+    .form-card {
+      background-color: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-xl);
+    }
+
+    /* ── Field Group ───────────────────────────────────────────── */
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    }
+
+    .field-group + .field-group {
+      margin-top: var(--spacing-md);
+    }
+
+    .field-group label {
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: var(--size-sm);
+      color: var(--color-text);
+    }
+
+    /* ── Inputs ────────────────────────────────────────────────── */
+    .field-input {
+      font-family: var(--font-sans);
+      font-size: var(--size-md);
+      color: var(--color-text);
+      background-color: var(--color-background);
+      width: 100%;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      transition: border-color 0.2s, outline 0.1s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .field-input::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    .field-input:focus {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 0;
+      border-color: var(--color-primary);
+    }
+
+    .field-input:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 0;
+      border-color: var(--color-primary);
+    }
+
+    /* ── Row Azioni ────────────────────────────────────────────── */
+    .row-azioni {
+      display: flex;
+      gap: var(--spacing-md);
+      justify-content: flex-end;
+      margin-top: var(--spacing-xl);
+    }
+
+    /* ── Buttons ───────────────────────────────────────────────── */
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: var(--size-md);
+      color: var(--color-primary);
+      background-color: transparent;
+      border: 1px solid var(--color-primary);
+      border-radius: var(--border-radius-sm);
+      padding: var(--spacing-sm) var(--spacing-xl);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-secondary:hover,
+    .btn-secondary:focus {
+      background-color: var(--color-surface);
+    }
+
+    .btn-secondary:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: var(--size-md);
+      color: #FFFFFF;
+      background-color: var(--color-primary);
+      border: 1px solid var(--color-primary);
+      border-radius: var(--border-radius-sm);
+      padding: var(--spacing-sm) var(--spacing-xl);
+      cursor: pointer;
+      transition: background-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus {
+      background-color: var(--color-primary-dark);
+      border-color: var(--color-primary-dark);
+    }
+
+    .btn-primary:focus-visible {
+      outline: 2px solid var(--color-primary-dark);
+      outline-offset: 2px;
+    }
+
+    /* ── Responsive ────────────────────────────────────────────── */
+    @media (max-width: 375px) {
+      .site-header {
+        padding: var(--spacing-md);
+      }
+
+      .main-content {
+        padding: var(--spacing-md);
+      }
+
+      .form-card {
+        padding: var(--spacing-lg);
+      }
+
+      .row-azioni {
+        flex-direction: column-reverse;
+        align-items: stretch;
+      }
+
+      .btn-secondary,
+      .btn-primary {
+        justify-content: center;
+        text-align: center;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .page { max-width: 900px; }
+    }
+    @media (min-width: 1280px) {
+      .page { max-width: 1024px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <!-- Header / Istituzionale -->
+    <header class="site-header">
+      <nav class="breadcrumb" aria-label="Percorso di navigazione">
+        <a href="home.html">← Conti</a>
+      </nav>
+      <h1 class="site-header__title">Nuovo conto</h1>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <form id="nuovo-conto-form" class="form-card" novalidate>
+
+        <!-- Nome conto -->
+        <div class="field-group">
+          <label for="nome-conto">Nome conto</label>
+          <input
+            class="field-input"
+            type="text"
+            id="nome-conto"
+            name="nome-conto"
+            placeholder="es. Conto familiare"
+            autocomplete="off"
+            required
+          />
+        </div>
+
+        <!-- Saldo iniziale -->
+        <div class="field-group">
+          <label for="saldo-iniziale">Saldo iniziale (€)</label>
+          <input
+            class="field-input"
+            type="number"
+            id="saldo-iniziale"
+            name="saldo-iniziale"
+            placeholder="0"
+            min="0"
+            step="0.01"
+          />
+        </div>
+
+        <!-- Azioni -->
+        <div class="row-azioni">
+          <a href="home.html" class="btn-secondary">Annulla</a>
+          <button
+            type="submit"
+            class="btn-primary"
+            onclick="window.location.href='dettaglio-conto-empty.html'; return false;"
+          >
+            Crea conto
+          </button>
+        </div>
+
+      </form>
+    </main>
+
+  </div>
+</body>
+</html>

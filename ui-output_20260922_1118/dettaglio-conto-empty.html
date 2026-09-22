@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conto familiare — Finanze di Famiglia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&family=Lora:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary:      #0066CC;
+      --color-primary-dark: #002244;
+      --color-background:   #FFFFFF;
+      --color-surface:      #F2F7FC;
+      --color-text:         #0E1B26;
+      --color-text-muted:   #5A6772;
+      --color-border:       #CCD8E0;
+      --color-error:        #D32F2F;
+      --color-success:      #2E7D32;
+
+      --font-primary:   'Titillium Web', sans-serif;
+      --font-secondary: 'Lora', serif;
+
+      --size-xs:  0.75rem;
+      --size-sm:  0.875rem;
+      --size-md:  1rem;
+      --size-lg:  1.25rem;
+      --size-xl:  1.5rem;
+      --size-2xl: 1.75rem;
+
+      --spacing-xs:  4px;
+      --spacing-sm:  8px;
+      --spacing-md:  16px;
+      --spacing-lg:  24px;
+      --spacing-xl:  32px;
+      --spacing-2xl: 48px;
+
+      --border-radius-sm: 4px;
+      --border-radius-md: 8px;
+      --border-radius-lg: 16px;
+
+      --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.08);
+
+      --bottom-nav-height: 64px;
+    }
+
+    /* Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font-primary);
+      font-size: var(--size-md);
+      color: var(--color-text);
+      background-color: var(--color-surface);
+      line-height: 1.5;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* Page container */
+    .page {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: var(--color-surface);
+      min-height: 100vh;
+      padding-bottom: calc(var(--bottom-nav-height) + var(--spacing-xl));
+      position: relative;
+    }
+
+    /* Header — Component: Header / Istituzionale */
+    .page-header {
+      background-color: var(--color-primary-dark);
+      padding: var(--spacing-md) var(--spacing-xl);
+    }
+
+    .page-header__breadcrumb {
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .breadcrumb-link {
+      font-family: var(--font-primary);
+      font-size: var(--size-sm);
+      font-weight: 400;
+      color: var(--color-background);
+      opacity: 0.85;
+      transition: opacity 0.2s;
+    }
+
+    .breadcrumb-link:hover,
+    .breadcrumb-link:focus {
+      opacity: 1;
+      text-decoration: underline;
+      outline: none;
+    }
+
+    .breadcrumb-link:focus-visible {
+      outline: 2px solid var(--color-background);
+      outline-offset: 2px;
+      border-radius: var(--border-radius-sm);
+    }
+
+    .page-header__title {
+      font-family: var(--font-primary);
+      font-weight: 700;
+      font-size: var(--size-xl);
+      color: var(--color-background);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .page-header__balance {
+      font-family: var(--font-primary);
+      font-weight: 400;
+      font-size: var(--size-lg);
+      color: var(--color-background);
+    }
+
+    /* Main content */
+    .main-content {
+      padding: var(--spacing-md);
+    }
+
+    /* Empty state */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--spacing-2xl) var(--spacing-md);
+    }
+
+    .empty-state__illustration {
+      display: block;
+      width: 96px;
+      height: 96px;
+      margin-bottom: var(--spacing-lg);
+      flex-shrink: 0;
+    }
+
+    .empty-state__title {
+      font-family: var(--font-primary);
+      font-weight: 700;
+      font-size: var(--size-lg);
+      color: var(--color-text);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .empty-state__subtitle {
+      font-family: var(--font-primary);
+      font-weight: 400;
+      font-size: var(--size-md);
+      color: var(--color-text-muted);
+      max-width: 280px;
+    }
+
+    /* Primary button */
+    .btn-primary {
+      display: inline-block;
+      font-family: var(--font-primary);
+      font-weight: 600;
+      font-size: var(--size-md);
+      color: var(--color-background);
+      background-color: var(--color-primary);
+      border-radius: var(--border-radius-sm);
+      padding: var(--spacing-sm) var(--spacing-xl);
+      margin-top: var(--spacing-lg);
+      transition: background-color 0.2s;
+      border: 2px solid transparent;
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus {
+      background-color: var(--color-primary-dark);
+      outline: none;
+    }
+
+    .btn-primary:focus-visible {
+      outline: 3px solid var(--color-primary);
+      outline-offset: 3px;
+    }
+
+    /* Bottom navigation — Component: Nav / Bottom */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: var(--color-background);
+      border-top: 1px solid var(--color-border);
+      height: var(--bottom-nav-height);
+      display: flex;
+      align-items: stretch;
+      z-index: 100;
+    }
+
+    .bottom-nav__inner {
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .bottom-nav__item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-xs);
+      color: var(--color-text-muted);
+      font-family: var(--font-primary);
+      font-weight: 600;
+      font-size: var(--size-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: var(--spacing-sm);
+      transition: color 0.2s;
+      border: none;
+      background: none;
+    }
+
+    .bottom-nav__item:hover {
+      color: var(--color-primary);
+    }
+
+    .bottom-nav__item:focus-visible {
+      outline: 3px solid var(--color-primary);
+      outline-offset: -3px;
+    }
+
+    .bottom-nav__item--active {
+      color: var(--color-primary);
+    }
+
+    .bottom-nav__icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    /* Responsive — SM */
+    @media (max-width: 768px) {
+      .page-header {
+        padding: var(--spacing-md);
+      }
+
+      .page-header__title {
+        font-size: var(--size-lg);
+      }
+
+      .main-content {
+        padding: var(--spacing-md) var(--spacing-sm);
+      }
+
+      .empty-state {
+        padding: var(--spacing-xl) var(--spacing-md);
+      }
+    }
+
+    /* Responsive — XS */
+    @media (max-width: 375px) {
+      .page-header__title {
+        font-size: var(--size-md);
+      }
+
+      .page-header__balance {
+        font-size: var(--size-md);
+      }
+
+      .empty-state__illustration {
+        width: 72px;
+        height: 72px;
+      }
+
+      .btn-primary {
+        font-size: var(--size-sm);
+        padding: var(--spacing-sm) var(--spacing-lg);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .page { max-width: 900px; }
+    }
+    @media (min-width: 1280px) {
+      .page { max-width: 1024px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- Header — Component: Header / Istituzionale -->
+    <header class="page-header">
+      <div class="page-header__breadcrumb">
+        <a href="home.html" class="breadcrumb-link">← Conti</a>
+      </div>
+      <div class="page-header__title">Conto familiare</div>
+      <div class="page-header__balance">€ 1.500,00</div>
+    </header>
+
+    <!-- Main — empty state -->
+    <main class="main-content">
+      <div class="empty-state">
+
+        <!-- SVG illustrazione: receipt/lista movimenti vuota -->
+        <svg
+          class="empty-state__illustration"
+          viewBox="0 0 96 96"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+          role="img"
+        >
+          <!-- Foglio ricevuta -->
+          <rect x="18" y="10" width="52" height="66" rx="4" stroke="#CCD8E0" stroke-width="3" fill="none"/>
+          <!-- Dentellatura inferiore -->
+          <path
+            d="M18 76 Q21 72 24 76 Q27 80 30 76 Q33 72 36 76 Q39 80 42 76 Q45 72 48 76 Q51 80 54 76 Q57 72 60 76 Q63 80 66 76 Q69 72 70 76"
+            stroke="#CCD8E0" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <!-- Linee testo -->
+          <line x1="28" y1="28" x2="60" y2="28" stroke="#CCD8E0" stroke-width="3" stroke-linecap="round"/>
+          <line x1="28" y1="38" x2="54" y2="38" stroke="#CCD8E0" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="28" y1="48" x2="58" y2="48" stroke="#CCD8E0" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="28" y1="58" x2="50" y2="58" stroke="#CCD8E0" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Icona "+" leggera in basso a destra -->
+          <circle cx="72" cy="72" r="12" fill="#F2F7FC" stroke="#CCD8E0" stroke-width="2"/>
+          <line x1="72" y1="66" x2="72" y2="78" stroke="#CCD8E0" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="66" y1="72" x2="78" y2="72" stroke="#CCD8E0" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+
+        <p class="empty-state__title">Nessun movimento ancora</p>
+        <p class="empty-state__subtitle">Aggiungi il primo movimento per questo conto</p>
+
+        <a href="nuovo-movimento.html" class="btn-primary">Aggiungi il primo movimento</a>
+
+      </div>
+    </main>
+
+    <!-- Bottom navigation — Component: Nav / Bottom -->
+    <nav class="bottom-nav" aria-label="Navigazione principale">
+      <div class="bottom-nav__inner">
+
+        <a href="dashboard.html" class="bottom-nav__item" aria-label="Dashboard">
+          <svg class="bottom-nav__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 12 L12 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M12 12 L17 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+            <path d="M5.5 17 Q8 13 12 13 Q16 13 18.5 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          </svg>
+          Dashboard
+        </a>
+
+        <a href="home.html" class="bottom-nav__item bottom-nav__item--active" aria-label="Conti" aria-current="page">
+          <svg class="bottom-nav__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M2 11h20" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M6 3h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <rect x="5" y="15" width="4" height="2" rx="1" fill="currentColor"/>
+          </svg>
+          Conti
+        </a>
+
+      </div>
+    </nav>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Finanze di Famiglia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <style>
+    :root {
+      --md-primary: #0061A4;
+      --md-on-primary: #FFFFFF;
+      --md-primary-container: #D1E4FF;
+      --md-on-primary-container: #001D36;
+      --md-surface: #FDFCFF;
+      --md-surface-variant: #DFE2EB;
+      --md-on-surface: #1A1C1E;
+      --md-on-surface-variant: #43474E;
+      --md-outline: #73777F;
+      --md-outline-variant: #C3C7CF;
+      --font: 'Roboto', sans-serif;
+      --shape-xs: 4px;
+      --shape-sm: 8px;
+      --shape-md: 12px;
+      --shape-lg: 16px;
+      --shape-xl: 28px;
+      --shape-full: 50%;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --spacing-2xl: 48px;
+      --elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+      --nav-bar-height: 80px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--md-surface-variant);
+      color: var(--md-on-surface);
+      padding-bottom: var(--nav-bar-height);
+    }
+
+    .page-wrapper {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ─── Top App Bar ─── */
+    .top-app-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--md-surface);
+      padding: var(--spacing-sm) var(--spacing-md);
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .top-app-bar__title {
+      font-family: var(--font);
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--md-on-surface);
+      line-height: 1.27;
+    }
+
+    .top-app-bar__trailing {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      background: var(--md-surface-variant);
+      color: var(--md-on-surface-variant);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: var(--shape-sm);
+      padding: var(--spacing-xs) var(--spacing-md) var(--spacing-xs) var(--spacing-sm);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      line-height: 1.43;
+    }
+
+    .filter-chip .material-symbols-outlined {
+      font-size: 18px;
+      color: var(--md-on-surface-variant);
+    }
+
+    /* ─── Segmented Button ─── */
+    .segmented-button-row {
+      padding: var(--spacing-md) var(--spacing-md) 0;
+    }
+
+    .segmented-button {
+      display: flex;
+      width: 100%;
+      border: 1px solid var(--md-outline-variant);
+      border-radius: var(--shape-full);
+      overflow: hidden;
+    }
+
+    .segmented-button__option {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px var(--spacing-md);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-on-surface);
+      background: transparent;
+      border: none;
+      border-right: 1px solid var(--md-outline-variant);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+
+    .segmented-button__option:last-child {
+      border-right: none;
+    }
+
+    .segmented-button__option--active {
+      background: var(--md-primary-container);
+      color: var(--md-on-primary-container);
+    }
+
+    .segmented-button__option--active .segmented-button__check {
+      display: inline-flex;
+      margin-right: var(--spacing-xs);
+    }
+
+    .segmented-button__check {
+      display: none;
+      align-items: center;
+    }
+
+    .segmented-button__check .material-symbols-outlined {
+      font-size: 18px;
+      color: var(--md-on-primary-container);
+    }
+
+    /* ─── Empty State Card ─── */
+    .empty-state-section {
+      padding: var(--spacing-md);
+    }
+
+    .empty-state-card {
+      background: var(--md-surface);
+      border-radius: var(--shape-md);
+      box-shadow: var(--elevation-1);
+      padding: var(--spacing-2xl) var(--spacing-xl);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .empty-state-card__icon {
+      font-size: 80px;
+      color: var(--md-outline);
+      line-height: 1;
+    }
+
+    .empty-state-card__headline {
+      font-family: var(--font);
+      font-size: 24px;
+      font-weight: 400;
+      color: var(--md-on-surface);
+      margin-top: var(--spacing-md);
+      line-height: 1.33;
+    }
+
+    .empty-state-card__body {
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--md-on-surface-variant);
+      margin-top: var(--spacing-sm);
+      line-height: 1.43;
+    }
+
+    /* ─── MD3 Filled Button ─── */
+    .btn-filled {
+      display: inline-block;
+      background: var(--md-primary);
+      color: var(--md-on-primary);
+      border-radius: var(--shape-full);
+      padding: 10px var(--spacing-lg);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      margin-top: var(--spacing-lg);
+      line-height: 1.43;
+      letter-spacing: 0.1px;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s;
+    }
+
+    .btn-filled:hover {
+      opacity: 0.92;
+    }
+
+    /* ─── Navigation Bar ─── */
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-bar-height);
+      background: var(--md-surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-top: 1px solid var(--md-outline-variant);
+      z-index: 20;
+    }
+
+    .nav-bar__inner {
+      max-width: 600px;
+      width: 100%;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-xs);
+      text-decoration: none;
+      padding: var(--spacing-xs) 0;
+      color: var(--md-on-surface-variant);
+      cursor: pointer;
+    }
+
+    .nav-item__indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 32px;
+      border-radius: var(--shape-full);
+      background: transparent;
+      transition: background 0.15s;
+    }
+
+    .nav-item--active .nav-item__indicator {
+      background: var(--md-primary-container);
+    }
+
+    .nav-item .material-symbols-outlined {
+      font-size: 24px;
+      color: var(--md-on-surface-variant);
+    }
+
+    .nav-item--active .material-symbols-outlined {
+      color: var(--md-on-primary-container);
+      font-variation-settings: 'FILL' 1;
+    }
+
+    .nav-item__label {
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--md-on-surface-variant);
+      line-height: 1.33;
+    }
+
+    .nav-item--active .nav-item__label {
+      color: var(--md-on-surface);
+      font-weight: 700;
+    }
+  
+    @media (min-width: 840px) {
+      .page-wrapper { max-width: 840px; }
+    }
+    @media (min-width: 1240px) {
+      .page-wrapper { max-width: 1024px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <!-- Top App Bar -->
+    <header class="top-app-bar">
+      <span class="top-app-bar__title">Dashboard</span>
+      <div class="top-app-bar__trailing">
+        <div class="filter-chip">
+          <span class="material-symbols-outlined">filter_list</span>
+          Tutti i conti
+        </div>
+      </div>
+    </header>
+
+    <!-- Segmented Button -->
+    <div class="segmented-button-row">
+      <div class="segmented-button" role="group" aria-label="Periodo">
+        <button class="segmented-button__option segmented-button__option--active" aria-pressed="true">
+          <span class="segmented-button__check" aria-hidden="true">
+            <span class="material-symbols-outlined">check</span>
+          </span>
+          Mese
+        </button>
+        <button class="segmented-button__option" aria-pressed="false">
+          Trimestre
+        </button>
+        <button class="segmented-button__option" aria-pressed="false">
+          Anno
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty State Card -->
+    <section class="empty-state-section">
+      <div class="empty-state-card">
+        <span class="material-symbols-outlined empty-state-card__icon" aria-hidden="true">insert_chart</span>
+        <h2 class="empty-state-card__headline">Nessun movimento in questo periodo</h2>
+        <p class="empty-state-card__body">Aggiungi movimenti per vedere le tue statistiche</p>
+        <a href="home.html" class="btn-filled">Aggiungi un movimento</a>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Navigation Bar -->
+  <nav class="nav-bar" aria-label="Navigazione principale">
+    <div class="nav-bar__inner">
+      <a href="dashboard.html" class="nav-item nav-item--active" aria-current="page">
+        <div class="nav-item__indicator">
+          <span class="material-symbols-outlined">dashboard</span>
+        </div>
+        <span class="nav-item__label">Dashboard</span>
+      </a>
+      <a href="home.html" class="nav-item">
+        <div class="nav-item__indicator">
+          <span class="material-symbols-outlined">account_balance_wallet</span>
+        </div>
+        <span class="nav-item__label">Conti</span>
+      </a>
+    </div>
+  </nav>
+
+</body>
+</html>

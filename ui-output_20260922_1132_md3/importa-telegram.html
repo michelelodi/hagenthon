@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Importa da Telegram — Finanze di Famiglia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <style>
+    :root {
+      --md-primary: #0061A4;
+      --md-on-primary: #FFFFFF;
+      --md-primary-container: #D1E4FF;
+      --md-on-primary-container: #001D36;
+      --md-secondary-container: #D8E2F9;
+      --md-on-secondary-container: #131C2B;
+      --md-surface: #FDFCFF;
+      --md-surface-variant: #DFE2EB;
+      --md-on-surface: #1A1C1E;
+      --md-on-surface-variant: #43474E;
+      --md-outline: #73777F;
+      --md-outline-variant: #C3C7CF;
+      --md-error: #BA1A1A;
+      --md-error-container: #FFDAD6;
+      --md-success: #386A20;
+      --md-success-container: #C0EFAA;
+      --md-telegram: #0088CC;
+      --font: 'Roboto', sans-serif;
+      --shape-xs: 4px;
+      --shape-sm: 8px;
+      --shape-md: 12px;
+      --shape-lg: 16px;
+      --shape-xl: 28px;
+      --shape-full: 50px;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--md-surface-variant);
+      color: var(--md-on-surface);
+      min-height: 100vh;
+    }
+
+    .page-wrapper { max-width: 560px; margin: 0 auto; }
+
+    /* ── Top App Bar ── */
+    .top-app-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      padding: var(--spacing-sm) var(--spacing-xs);
+      background: var(--md-surface);
+      height: 64px;
+    }
+    .top-app-bar__leading {
+      display: flex; align-items: center; justify-content: center;
+      width: 48px; height: 48px; border-radius: var(--shape-full);
+      color: var(--md-on-surface); text-decoration: none; transition: background 0.2s;
+    }
+    .top-app-bar__leading:hover { background: rgba(26,28,30,0.08); }
+    .top-app-bar__title { font-size: 22px; font-weight: 400; flex: 1; }
+
+    /* ── Main ── */
+    .main-content { padding: var(--spacing-md); display: flex; flex-direction: column; gap: var(--spacing-md); }
+
+    /* ── Hero banner ── */
+    .hero-banner {
+      background: var(--md-primary-container);
+      border-radius: var(--shape-lg);
+      padding: var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+    .hero-icon {
+      font-size: 40px;
+      color: var(--md-telegram);
+      flex-shrink: 0;
+    }
+    .hero-text h2 { font-size: 16px; font-weight: 500; color: var(--md-on-primary-container); }
+    .hero-text p { font-size: 13px; color: var(--md-on-primary-container); margin-top: 4px; opacity: 0.8; }
+
+    /* ── Status ── */
+    .status-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--md-surface);
+      border-radius: var(--shape-md);
+      padding: var(--spacing-md);
+      box-shadow: var(--elevation-1);
+    }
+    .status-label { font-size: 14px; color: var(--md-on-surface-variant); }
+    .status-count {
+      font-size: 24px; font-weight: 700; color: var(--md-primary);
+    }
+    .btn-refresh {
+      display: flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border-radius: var(--shape-full);
+      border: none; background: transparent; cursor: pointer;
+      color: var(--md-primary); transition: background 0.2s;
+    }
+    .btn-refresh:hover { background: rgba(0, 97, 164, 0.08); }
+
+    /* ── Empty state ── */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; gap: var(--spacing-md);
+      padding: var(--spacing-2xl) var(--spacing-md);
+      text-align: center;
+    }
+    .empty-state .material-symbols-outlined { font-size: 64px; color: var(--md-outline); }
+    .empty-state p { font-size: 14px; color: var(--md-on-surface-variant); max-width: 260px; }
+
+    /* ── Expense card ── */
+    .expense-card {
+      background: var(--md-surface);
+      border-radius: var(--shape-lg);
+      box-shadow: var(--elevation-1);
+      overflow: hidden;
+    }
+    .expense-card__header {
+      display: flex; align-items: center; gap: var(--spacing-sm);
+      padding: var(--spacing-md) var(--spacing-md) var(--spacing-sm);
+    }
+    .expense-card__icon {
+      width: 40px; height: 40px; border-radius: var(--shape-full);
+      background: var(--md-primary-container);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--md-on-primary-container); font-size: 20px; flex-shrink: 0;
+    }
+    .expense-card__title { font-size: 16px; font-weight: 500; flex: 1; }
+    .expense-card__amount { font-size: 20px; font-weight: 700; color: var(--md-error); }
+
+    .expense-card__meta {
+      display: flex; gap: var(--spacing-sm); flex-wrap: wrap;
+      padding: 0 var(--spacing-md) var(--spacing-sm);
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px var(--spacing-sm);
+      border-radius: var(--shape-full);
+      background: var(--md-secondary-container);
+      color: var(--md-on-secondary-container);
+      font-size: 12px; font-weight: 500;
+    }
+
+    /* Confidence indicator */
+    .confidence {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; color: var(--md-on-surface-variant);
+      padding: 4px var(--spacing-sm);
+    }
+    .confidence--high { color: var(--md-success); }
+    .confidence--mid { color: #7D5700; }
+    .confidence--low { color: var(--md-error); }
+
+    /* Editable fields */
+    .expense-card__edit {
+      padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
+      display: grid; gap: var(--spacing-sm);
+      border-top: 1px solid var(--md-outline-variant);
+    }
+    .field-row { display: grid; gap: 4px; }
+    .field-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--md-on-surface-variant); }
+    .field-input, .field-select {
+      padding: var(--spacing-sm) var(--spacing-md);
+      border: 1px solid var(--md-outline);
+      border-radius: var(--shape-sm);
+      font-family: var(--font);
+      font-size: 14px;
+      color: var(--md-on-surface);
+      background: var(--md-surface);
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    .field-input:focus, .field-select:focus { border-color: var(--md-primary); }
+    .conto-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm); }
+
+    /* Card actions */
+    .expense-card__actions {
+      display: flex; gap: var(--spacing-sm); justify-content: flex-end;
+      padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
+      border-top: 1px solid var(--md-outline-variant);
+    }
+    .btn-danger {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 8px var(--spacing-md);
+      border-radius: var(--shape-full);
+      border: none; background: transparent; cursor: pointer;
+      font-family: var(--font); font-size: 14px; font-weight: 500;
+      color: var(--md-error); transition: background 0.2s;
+    }
+    .btn-danger:hover { background: rgba(186, 26, 26, 0.08); }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 8px var(--spacing-md);
+      border-radius: var(--shape-full);
+      border: none; background: var(--md-primary); cursor: pointer;
+      font-family: var(--font); font-size: 14px; font-weight: 500;
+      color: var(--md-on-primary); box-shadow: var(--elevation-1);
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #1a71b0; }
+    .btn-primary:disabled { opacity: 0.5; cursor: default; }
+
+    /* Import all bar */
+    .import-all-bar {
+      position: sticky; bottom: 16px;
+      background: var(--md-primary);
+      color: var(--md-on-primary);
+      border-radius: var(--shape-xl);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-lg);
+      margin-top: var(--spacing-md);
+      cursor: pointer; transition: background 0.2s;
+    }
+    .import-all-bar:hover { background: #1a71b0; }
+    .import-all-bar span { font-size: 16px; font-weight: 500; }
+    .import-all-bar .material-symbols-outlined { font-size: 20px; }
+
+    /* Error banner */
+    .error-banner {
+      background: var(--md-error-container);
+      border-radius: var(--shape-md);
+      padding: var(--spacing-md);
+      font-size: 14px;
+      color: var(--md-error);
+      display: none;
+    }
+    .error-banner.visible { display: block; }
+
+    /* Success snackbar */
+    .snackbar {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: #1A1C1E; color: #FFFFFF;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      border-radius: var(--shape-full);
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease;
+      white-space: nowrap;
+      z-index: 100;
+    }
+    .snackbar.visible { transform: translateX(-50%) translateY(0); }
+
+    /* Spinner */
+    .spinner {
+      width: 24px; height: 24px;
+      border: 3px solid var(--md-outline-variant);
+      border-top-color: var(--md-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-row { display: flex; align-items: center; justify-content: center; padding: var(--spacing-2xl); }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <header class="top-app-bar">
+    <a href="home.html" class="top-app-bar__leading" aria-label="Indietro">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </a>
+    <h1 class="top-app-bar__title">Importa da Telegram</h1>
+  </header>
+
+  <main class="main-content">
+
+    <!-- Hero -->
+    <div class="hero-banner">
+      <span class="material-symbols-outlined hero-icon">smart_toy</span>
+      <div class="hero-text">
+        <h2>Bot scontrini attivo</h2>
+        <p>Invia una foto dello scontrino al bot e appare qui, pronta da importare.</p>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-banner" id="error-banner">
+      Il bot non risponde su localhost:3001. Assicurati che sia avviato con <code>npm start</code> nella cartella <code>bot/</code>.
+    </div>
+
+    <!-- Status row -->
+    <div class="status-row">
+      <div>
+        <div class="status-label">Spese in attesa</div>
+        <div class="status-count" id="count">—</div>
+      </div>
+      <button class="btn-refresh" onclick="carica()" aria-label="Aggiorna">
+        <span class="material-symbols-outlined">refresh</span>
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-row" id="loading" style="display:none">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Lista spese -->
+    <div id="lista-spese"></div>
+
+    <!-- Import all FAB -->
+    <div class="import-all-bar" id="import-all-bar" style="display:none" onclick="importaTutte()">
+      <span>Importa tutte</span>
+      <span class="material-symbols-outlined">download_done</span>
+    </div>
+
+  </main>
+</div>
+
+<!-- Snackbar -->
+<div class="snackbar" id="snackbar"></div>
+
+<script>
+  const BOT_API = 'http://localhost:3001';
+  const CATEGORIE_USCITA = ['Casa', 'Spesa', 'Ristoranti', 'Trasporti', 'Salute', 'Abbigliamento', 'Svago', 'Istruzione', 'Abbonamenti', 'Altro'];
+  const CATEGORIE_ENTRATA = ['Stipendio', 'Rimborso', 'Regalo', 'Altro'];
+  const CAT_ICON = {
+    'casa': 'home', 'spesa': 'shopping_cart', 'ristoranti': 'restaurant',
+    'trasporti': 'directions_bus', 'salute': 'favorite', 'abbigliamento': 'checkroom',
+    'svago': 'sports_esports', 'istruzione': 'school', 'abbonamenti': 'subscriptions', 'altro': 'category'
+  };
+
+  let pendingItems = [];
+
+  function conti() {
+    try {
+      return JSON.parse(localStorage.getItem('finanze_conti') || '[]');
+    } catch { return []; }
+  }
+
+  function movimenti() {
+    try {
+      return JSON.parse(localStorage.getItem('finanze_movimenti') || '[]');
+    } catch { return []; }
+  }
+
+  function salvaMovimento(mov) {
+    const list = movimenti();
+    list.push(mov);
+    localStorage.setItem('finanze_movimenti', JSON.stringify(list));
+
+    // Aggiorna saldo del conto
+    const cs = conti();
+    const conto = cs.find(c => c.id === mov.contoId);
+    if (conto) {
+      conto.saldo = (conto.saldo || conto.saldoIniziale || 0) + (mov.tipo === 'entrata' ? mov.importo : -mov.importo);
+      localStorage.setItem('finanze_conti', JSON.stringify(cs));
+    }
+  }
+
+  function snackbar(msg) {
+    const el = document.getElementById('snackbar');
+    el.textContent = msg;
+    el.classList.add('visible');
+    setTimeout(() => el.classList.remove('visible'), 2800);
+  }
+
+  function iconaCategoria(cat) {
+    return CAT_ICON[cat?.toLowerCase()] || 'category';
+  }
+
+  function confidenceClass(f) {
+    if (f >= 0.8) return 'confidence--high';
+    if (f >= 0.5) return 'confidence--mid';
+    return 'confidence--low';
+  }
+  function confidenceLabel(f) {
+    if (f >= 0.8) return 'Alta certezza';
+    if (f >= 0.5) return 'Verifica consigliata';
+    return 'Scarsa leggibilità';
+  }
+
+  function renderCard(item, idx) {
+    const cs = conti();
+    const opzioniConti = cs.length > 0
+      ? cs.map(c => `<option value="${c.id}">${c.nome}</option>`).join('')
+      : '<option value="default">Conto principale</option>';
+
+    const categorieLista = (item.tipo === 'entrata' ? CATEGORIE_ENTRATA : CATEGORIE_USCITA)
+      .map(c => `<option value="${c.toLowerCase()}" ${c.toLowerCase() === (item.categoria||'').toLowerCase() ? 'selected' : ''}>${c}</option>`)
+      .join('');
+
+    const fiducia = item.fiducia ?? 1;
+
+    return `
+    <div class="expense-card" id="card-${item.id}">
+      <div class="expense-card__header">
+        <div class="expense-card__icon">
+          <span class="material-symbols-outlined">${iconaCategoria(item.categoria)}</span>
+        </div>
+        <div class="expense-card__title">${escHtml(item.descrizione)}</div>
+        <div class="expense-card__amount">€${Number(item.importo).toFixed(2)}</div>
+      </div>
+      <div class="expense-card__meta">
+        <span class="chip"><span class="material-symbols-outlined" style="font-size:14px">calendar_today</span>${item.data}</span>
+        <span class="chip">${item.categoria}</span>
+        <span class="confidence ${confidenceClass(fiducia)}">${confidenceLabel(fiducia)}</span>
+      </div>
+      <div class="expense-card__edit">
+        <div class="field-row">
+          <label class="field-label">Descrizione</label>
+          <input class="field-input" id="desc-${item.id}" type="text" value="${escHtml(item.descrizione)}" />
+        </div>
+        <div class="conto-row">
+          <div class="field-row">
+            <label class="field-label">Importo (€)</label>
+            <input class="field-input" id="importo-${item.id}" type="number" step="0.01" value="${Number(item.importo).toFixed(2)}" />
+          </div>
+          <div class="field-row">
+            <label class="field-label">Data</label>
+            <input class="field-input" id="data-${item.id}" type="date" value="${item.data}" />
+          </div>
+        </div>
+        <div class="conto-row">
+          <div class="field-row">
+            <label class="field-label">Categoria</label>
+            <select class="field-select" id="cat-${item.id}">${categorieLista}</select>
+          </div>
+          <div class="field-row">
+            <label class="field-label">Conto</label>
+            <select class="field-select" id="conto-${item.id}">${opzioniConti}</select>
+          </div>
+        </div>
+      </div>
+      <div class="expense-card__actions">
+        <button class="btn-danger" onclick="scarta('${item.id}')">
+          <span class="material-symbols-outlined" style="font-size:16px">delete</span>Scarta
+        </button>
+        <button class="btn-primary" onclick="importaSingola('${item.id}')">
+          <span class="material-symbols-outlined" style="font-size:16px">check</span>Importa
+        </button>
+      </div>
+    </div>`;
+  }
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function aggiornaUI() {
+    const lista = document.getElementById('lista-spese');
+    const bar = document.getElementById('import-all-bar');
+    const count = document.getElementById('count');
+
+    count.textContent = pendingItems.length;
+    bar.style.display = pendingItems.length > 1 ? 'flex' : 'none';
+
+    if (pendingItems.length === 0) {
+      lista.innerHTML = `
+        <div class="empty-state">
+          <span class="material-symbols-outlined">check_circle</span>
+          <p>Nessuna spesa in attesa. Invia una foto di uno scontrino al bot Telegram!</p>
+        </div>`;
+    } else {
+      lista.innerHTML = pendingItems.map((item, i) => renderCard(item, i)).join('');
+    }
+  }
+
+  async function carica() {
+    document.getElementById('loading').style.display = 'flex';
+    document.getElementById('lista-spese').innerHTML = '';
+    document.getElementById('error-banner').classList.remove('visible');
+
+    try {
+      const res = await fetch(`${BOT_API}/pending`, { signal: AbortSignal.timeout(4000) });
+      pendingItems = await res.json();
+      document.getElementById('error-banner').classList.remove('visible');
+    } catch {
+      pendingItems = [];
+      document.getElementById('error-banner').classList.add('visible');
+    } finally {
+      document.getElementById('loading').style.display = 'none';
+      aggiornaUI();
+    }
+  }
+
+  function leggiCampi(id) {
+    return {
+      descrizione: document.getElementById(`desc-${id}`)?.value?.trim() || 'Scontrino',
+      importo: parseFloat(document.getElementById(`importo-${id}`)?.value) || 0,
+      data: document.getElementById(`data-${id}`)?.value || new Date().toISOString().slice(0,10),
+      categoria: document.getElementById(`cat-${id}`)?.value || 'altro',
+      contoId: document.getElementById(`conto-${id}`)?.value || 'default',
+    };
+  }
+
+  async function importaSingola(id) {
+    const btn = document.querySelector(`#card-${id} .btn-primary`);
+    if (btn) btn.disabled = true;
+
+    const campi = leggiCampi(id);
+    const item = pendingItems.find(i => i.id === id);
+    const mov = {
+      id: `mov_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
+      tipo: item?.tipo || 'uscita',
+      importo: campi.importo,
+      descrizione: campi.descrizione,
+      data: campi.data,
+      categoria: campi.categoria,
+      contoId: campi.contoId,
+      fonte: 'telegram',
+    };
+    salvaMovimento(mov);
+
+    try { await fetch(`${BOT_API}/pending/${id}`, { method: 'DELETE' }); } catch {}
+
+    pendingItems = pendingItems.filter(i => i.id !== id);
+    aggiornaUI();
+    snackbar('✅ Movimento importato');
+  }
+
+  async function scarta(id) {
+    try { await fetch(`${BOT_API}/pending/${id}`, { method: 'DELETE' }); } catch {}
+    pendingItems = pendingItems.filter(i => i.id !== id);
+    aggiornaUI();
+    snackbar('🗑️ Spesa scartata');
+  }
+
+  async function importaTutte() {
+    const promises = [...pendingItems].map(item => importaSingola(item.id));
+    await Promise.all(promises);
+    snackbar('✅ Tutte le spese importate');
+  }
+
+  // Avvia caricamento
+  carica();
+
+  // Auto-refresh ogni 15 secondi
+  setInterval(carica, 15000);
+</script>
+</body>
+</html>

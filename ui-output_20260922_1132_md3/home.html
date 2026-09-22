@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>I tuoi conti — Finanze di Famiglia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <style>
+    :root {
+      --md-primary: #0061A4;
+      --md-on-primary: #FFFFFF;
+      --md-primary-container: #D1E4FF;
+      --md-on-primary-container: #001D36;
+      --md-secondary: #535F70;
+      --md-on-secondary: #FFFFFF;
+      --md-surface: #FDFCFF;
+      --md-surface-variant: #DFE2EB;
+      --md-on-surface: #1A1C1E;
+      --md-on-surface-variant: #43474E;
+      --md-outline: #73777F;
+      --md-outline-variant: #C3C7CF;
+      --md-error: #BA1A1A;
+      --md-success: #386A20;
+      --md-inverse-surface: #2F3033;
+      --md-inverse-on-surface: #F1F0F4;
+      --font: 'Roboto', sans-serif;
+      --shape-xs: 4px;
+      --shape-sm: 8px;
+      --shape-md: 12px;
+      --shape-lg: 16px;
+      --shape-xl: 28px;
+      --shape-full: 50%;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --spacing-2xl: 48px;
+      --elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+      --elevation-2: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
+      --nav-bar-height: 80px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--md-surface);
+      color: var(--md-on-surface);
+      padding-bottom: var(--nav-bar-height);
+    }
+
+    /* ── Page wrapper ── */
+    .page-wrapper {
+      max-width: 600px;
+      margin: 0 auto;
+      min-height: 100%;
+      position: relative;
+    }
+
+    /* ── MD3 Top App Bar (Small) ── */
+    .top-app-bar {
+      background: var(--md-surface);
+      border-bottom: 1px solid var(--md-outline-variant);
+      height: 64px;
+      padding: 0 var(--spacing-md);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .top-app-bar__title {
+      font-family: var(--font);
+      font-weight: 400;
+      font-size: 22px;
+      line-height: 28px;
+      color: var(--md-on-surface);
+    }
+
+    .top-app-bar__trailing {
+      display: flex;
+      align-items: center;
+    }
+
+    /* MD3 Text Button */
+    .btn-text {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      font-family: var(--font);
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 20px;
+      letter-spacing: 0.1px;
+      color: var(--md-primary);
+      text-decoration: none;
+      padding: 10px var(--spacing-sm);
+      border-radius: var(--shape-xl);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-text:hover {
+      background: color-mix(in srgb, var(--md-primary) 8%, transparent);
+    }
+
+    .btn-text:active {
+      background: color-mix(in srgb, var(--md-primary) 12%, transparent);
+    }
+
+    .btn-text .material-symbols-outlined {
+      font-size: 18px;
+      color: var(--md-primary);
+    }
+
+    /* ── Main content ── */
+    .main-content {
+      padding: var(--spacing-md);
+    }
+
+    /* ── MD3 Elevated Cards ── */
+    .account-cards {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+
+    .account-card {
+      display: block;
+      background: var(--md-surface);
+      border-radius: var(--shape-md);
+      box-shadow: var(--elevation-1);
+      padding: var(--spacing-md) var(--spacing-lg);
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+      transition: box-shadow 0.2s ease;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .account-card:hover {
+      box-shadow: var(--elevation-2);
+    }
+
+    .account-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .account-card__name {
+      font-family: var(--font);
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 24px;
+      color: var(--md-on-surface);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .account-card__balance-label {
+      font-family: var(--font);
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 16px;
+      color: var(--md-on-surface-variant);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .account-card__amount {
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 22px;
+      line-height: 28px;
+      color: var(--md-primary);
+    }
+
+    /* ── MD3 Navigation Bar (fixed bottom) ── */
+    .nav-bar {
+      background: var(--md-surface);
+      border-top: 1px solid var(--md-outline-variant);
+      height: var(--nav-bar-height);
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .nav-bar__inner {
+      max-width: 600px;
+      width: 100%;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .nav-bar__item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-xs);
+      text-decoration: none;
+      color: var(--md-on-surface-variant);
+      padding: var(--spacing-sm) var(--spacing-xs);
+      transition: color 0.2s ease;
+    }
+
+    .nav-bar__item:hover {
+      color: var(--md-on-surface);
+    }
+
+    /* Indicator pill for active state */
+    .nav-bar__indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 32px;
+      border-radius: var(--shape-xl);
+      transition: background 0.2s ease;
+    }
+
+    .nav-bar__item--active .nav-bar__indicator {
+      background: var(--md-primary-container);
+    }
+
+    .nav-bar__item .material-symbols-outlined {
+      font-size: 24px;
+      color: var(--md-on-surface-variant);
+    }
+
+    .nav-bar__item--active .material-symbols-outlined {
+      color: var(--md-on-primary-container);
+    }
+
+    .nav-bar__label {
+      font-family: var(--font);
+      font-weight: 500;
+      font-size: 12px;
+      line-height: 16px;
+      color: var(--md-on-surface-variant);
+    }
+
+    .nav-bar__item--active .nav-bar__label {
+      color: var(--md-on-primary-container);
+    }
+
+    /* ── Responsive ── */
+    @media (min-width: 600px) {
+      .page-wrapper {
+        max-width: 600px;
+      }
+
+      .nav-bar__inner {
+        max-width: 600px;
+      }
+    }
+
+    @media (min-width: 840px) {
+      .page-wrapper {
+        max-width: 720px;
+      }
+
+      .top-app-bar {
+        max-width: 720px;
+        margin: 0 auto;
+        left: 0;
+        right: 0;
+      }
+
+      .nav-bar__inner {
+        max-width: 720px;
+      }
+
+      .account-cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-md);
+      }
+
+      .account-card {
+        margin-bottom: 0;
+      }
+    }
+
+    /* ── Telegram banner ── */
+    .telegram-banner {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      background: #0088CC;
+      color: #ffffff;
+      border-radius: var(--shape-lg);
+      padding: var(--spacing-md);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: var(--elevation-1);
+      transition: background 0.2s;
+    }
+    .telegram-banner:hover { background: #007ab8; }
+    .telegram-banner__text { flex: 1; }
+    .telegram-banner__badge {
+      background: #ffffff;
+      color: #0088CC;
+      border-radius: var(--shape-full);
+      padding: 2px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      min-width: 28px;
+      text-align: center;
+    }
+  
+    @media (min-width: 1240px) {
+      .page-wrapper { max-width: 1024px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <!-- MD3 Top App Bar (Small) -->
+    <header class="top-app-bar">
+      <h1 class="top-app-bar__title">I tuoi conti</h1>
+      <div class="top-app-bar__trailing">
+        <a href="nuovo-conto.html" class="btn-text">
+          <span class="material-symbols-outlined">add</span>
+          Nuovo conto
+        </a>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="main-content">
+
+      <!-- Banner Telegram import -->
+      <a href="importa-telegram.html" id="telegram-banner" class="telegram-banner" style="display:none">
+        <span class="material-symbols-outlined">smart_toy</span>
+        <span class="telegram-banner__text">Scontrini pronti da importare</span>
+        <span class="telegram-banner__badge" id="telegram-badge">0</span>
+        <span class="material-symbols-outlined">chevron_right</span>
+      </a>
+
+      <div class="account-cards">
+
+        <!-- Card 1: Conto familiare -->
+        <a href="dettaglio-conto.html" class="account-card">
+          <div class="account-card__name">Conto familiare</div>
+          <div class="account-card__balance-label">Saldo</div>
+          <div class="account-card__amount">€2.340,50</div>
+        </a>
+
+        <!-- Card 2: Contanti -->
+        <a href="dettaglio-conto.html" class="account-card">
+          <div class="account-card__name">Contanti</div>
+          <div class="account-card__balance-label">Saldo</div>
+          <div class="account-card__amount">€150,00</div>
+        </a>
+
+        <!-- Card 3: Carta prepagata -->
+        <a href="dettaglio-conto.html" class="account-card">
+          <div class="account-card__name">Carta prepagata</div>
+          <div class="account-card__balance-label">Saldo</div>
+          <div class="account-card__amount">€89,20</div>
+        </a>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- MD3 Navigation Bar (fixed bottom) -->
+  <nav class="nav-bar">
+    <div class="nav-bar__inner">
+
+      <!-- Dashboard -->
+      <a href="dashboard.html" class="nav-bar__item">
+        <div class="nav-bar__indicator">
+          <span class="material-symbols-outlined">bar_chart</span>
+        </div>
+        <span class="nav-bar__label">Dashboard</span>
+      </a>
+
+      <!-- Conti (attivo) -->
+      <a href="home.html" class="nav-bar__item nav-bar__item--active">
+        <div class="nav-bar__indicator">
+          <span class="material-symbols-outlined">account_balance_wallet</span>
+        </div>
+        <span class="nav-bar__label">Conti</span>
+      </a>
+
+    </div>
+  </nav>
+
+  <script>
+    async function checkTelegramPending() {
+      try {
+        const res = await fetch('http://localhost:3001/pending', { signal: AbortSignal.timeout(3000) });
+        const items = await res.json();
+        const banner = document.getElementById('telegram-banner');
+        const badge = document.getElementById('telegram-badge');
+        if (items.length > 0) {
+          badge.textContent = items.length;
+          banner.style.display = 'flex';
+        } else {
+          banner.style.display = 'none';
+        }
+      } catch {
+        // Bot non attivo, nascondi il banner silenziosamente
+        document.getElementById('telegram-banner').style.display = 'none';
+      }
+    }
+    checkTelegramPending();
+    setInterval(checkTelegramPending, 15000);
+  </script>
+
+</body>
+</html>

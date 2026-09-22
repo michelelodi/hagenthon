@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conto familiare — Finanze di Famiglia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <style>
+    :root {
+      --md-primary: #0061A4;
+      --md-on-primary: #FFFFFF;
+      --md-primary-container: #D1E4FF;
+      --md-on-primary-container: #001D36;
+      --md-surface: #FDFCFF;
+      --md-surface-variant: #DFE2EB;
+      --md-on-surface: #1A1C1E;
+      --md-on-surface-variant: #43474E;
+      --md-outline: #73777F;
+      --md-outline-variant: #C3C7CF;
+      --md-error: #BA1A1A;
+      --md-error-container: #FFDAD6;
+      --md-success: #386A20;
+      --md-success-container: #C0EFAA;
+      --font: 'Roboto', sans-serif;
+      --shape-xs: 4px;
+      --shape-sm: 8px;
+      --shape-md: 12px;
+      --shape-lg: 16px;
+      --shape-xl: 28px;
+      --shape-full: 50%;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --spacing-2xl: 48px;
+      --elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+      --elevation-2: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
+      --nav-bar-height: 80px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font);
+      background-color: var(--md-surface);
+      color: var(--md-on-surface);
+      padding-bottom: var(--nav-bar-height);
+      min-height: 100vh;
+    }
+
+    .page-wrapper {
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* ── Top App Bar (Medium) ── */
+    .top-app-bar {
+      background-color: var(--md-surface);
+      border-bottom: 1px solid var(--md-outline-variant);
+      padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .top-app-bar__row-leading {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      min-height: 48px;
+    }
+
+    .top-app-bar__back-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--shape-full);
+      color: var(--md-on-surface);
+      text-decoration: none;
+      flex-shrink: 0;
+      transition: background-color 0.2s;
+    }
+
+    .top-app-bar__back-btn:hover {
+      background-color: var(--md-surface-variant);
+    }
+
+    .top-app-bar__title {
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--md-on-surface);
+      line-height: 1.3;
+    }
+
+    .top-app-bar__sub-headline {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--md-primary);
+      line-height: 1.2;
+      padding-left: 48px;
+      padding-top: var(--spacing-xs);
+    }
+
+    /* ── Extended FAB ── */
+    .extended-fab {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      text-decoration: none;
+      background-color: var(--md-primary-container);
+      color: var(--md-on-primary-container);
+      border-radius: var(--shape-lg);
+      padding: var(--spacing-sm) var(--spacing-lg);
+      margin: var(--spacing-md);
+      box-shadow: var(--elevation-2);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.1px;
+      transition: box-shadow 0.2s, background-color 0.2s;
+      width: fit-content;
+    }
+
+    .extended-fab:hover {
+      box-shadow: var(--elevation-1);
+      background-color: color-mix(in srgb, var(--md-primary-container) 92%, var(--md-on-primary-container));
+    }
+
+    .extended-fab .material-symbols-outlined {
+      font-size: 20px;
+    }
+
+    /* ── Lista movimenti ── */
+    .movements-list {
+      list-style: none;
+    }
+
+    .movement-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-bottom: 1px solid var(--md-outline-variant);
+      min-height: 72px;
+    }
+
+    .movement-item__leading {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .chip {
+      border-radius: var(--shape-full);
+      padding: 2px 10px;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .chip--entrata {
+      background-color: var(--md-success-container);
+      color: var(--md-success);
+    }
+
+    .chip--uscita {
+      background-color: var(--md-error-container);
+      color: var(--md-error);
+    }
+
+    .movement-item__content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .movement-item__headline {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-on-surface);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .movement-item__supporting {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--md-on-surface-variant);
+      margin-top: 2px;
+    }
+
+    .movement-item__trailing {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      flex-shrink: 0;
+    }
+
+    .movement-item__amount {
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .movement-item__amount--entrata {
+      color: var(--md-success);
+    }
+
+    .movement-item__amount--uscita {
+      color: var(--md-error);
+    }
+
+    .movement-item__delete-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--shape-full);
+      border: none;
+      background: transparent;
+      color: var(--md-on-surface-variant);
+      cursor: pointer;
+      font-family: var(--font);
+      transition: background-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .movement-item__delete-btn:hover {
+      background-color: var(--md-surface-variant);
+    }
+
+    .movement-item__delete-btn .material-symbols-outlined {
+      font-size: 20px;
+    }
+
+    /* ── Navigation Bar ── */
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-bar-height);
+      background-color: var(--md-surface);
+      border-top: 1px solid var(--md-outline-variant);
+      display: flex;
+      align-items: stretch;
+      z-index: 20;
+    }
+
+    .nav-bar__inner {
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .nav-bar__item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      text-decoration: none;
+      color: var(--md-on-surface-variant);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      padding: var(--spacing-sm) var(--spacing-xs);
+      transition: color 0.2s;
+      position: relative;
+    }
+
+    .nav-bar__item:hover {
+      color: var(--md-primary);
+    }
+
+    .nav-bar__item--active {
+      color: var(--md-primary);
+    }
+
+    .nav-bar__indicator {
+      position: absolute;
+      top: 12px;
+      width: 64px;
+      height: 32px;
+      border-radius: var(--shape-full);
+      background-color: var(--md-primary-container);
+    }
+
+    .nav-bar__item .material-symbols-outlined {
+      font-size: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .nav-bar__label {
+      position: relative;
+      z-index: 1;
+    }
+  
+    @media (min-width: 840px) {
+      .page-wrapper { max-width: 840px; }
+    }
+    @media (min-width: 1240px) {
+      .page-wrapper { max-width: 1024px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <!-- Top App Bar (Medium) -->
+    <header class="top-app-bar">
+      <div class="top-app-bar__row-leading">
+        <a href="home.html" class="top-app-bar__back-btn" aria-label="Torna indietro">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </a>
+        <span class="top-app-bar__title">Conto familiare</span>
+      </div>
+      <div class="top-app-bar__sub-headline">€ 2.340,50</div>
+    </header>
+
+    <!-- Extended FAB: Nuovo movimento -->
+    <a href="nuovo-movimento.html" class="extended-fab" aria-label="Nuovo movimento">
+      <span class="material-symbols-outlined">add</span>
+      <span>Nuovo movimento</span>
+    </a>
+
+    <!-- Lista movimenti -->
+    <ul class="movements-list" aria-label="Movimenti del conto">
+
+      <!-- Movimento 1: Spesa – Uscita -->
+      <li class="movement-item">
+        <div class="movement-item__leading">
+          <span class="chip chip--uscita">Uscita</span>
+        </div>
+        <div class="movement-item__content">
+          <div class="movement-item__headline">Spesa</div>
+          <div class="movement-item__supporting">22/09/2026</div>
+        </div>
+        <div class="movement-item__trailing">
+          <span class="movement-item__amount movement-item__amount--uscita">-€ 87,40</span>
+          <button
+            class="movement-item__delete-btn"
+            aria-label="Elimina movimento Spesa del 22/09/2026"
+            onclick="if(confirm('Eliminare?')) window.history.back()"
+          >
+            <span class="material-symbols-outlined">delete</span>
+          </button>
+        </div>
+      </li>
+
+      <!-- Movimento 2: Stipendio – Entrata -->
+      <li class="movement-item">
+        <div class="movement-item__leading">
+          <span class="chip chip--entrata">Entrata</span>
+        </div>
+        <div class="movement-item__content">
+          <div class="movement-item__headline">Stipendio</div>
+          <div class="movement-item__supporting">21/09/2026</div>
+        </div>
+        <div class="movement-item__trailing">
+          <span class="movement-item__amount movement-item__amount--entrata">+€ 1.800,00</span>
+          <button
+            class="movement-item__delete-btn"
+            aria-label="Elimina movimento Stipendio del 21/09/2026"
+            onclick="if(confirm('Eliminare?')) window.history.back()"
+          >
+            <span class="material-symbols-outlined">delete</span>
+          </button>
+        </div>
+      </li>
+
+      <!-- Movimento 3: Ristoranti – Uscita -->
+      <li class="movement-item">
+        <div class="movement-item__leading">
+          <span class="chip chip--uscita">Uscita</span>
+        </div>
+        <div class="movement-item__content">
+          <div class="movement-item__headline">Ristoranti</div>
+          <div class="movement-item__supporting">20/09/2026</div>
+        </div>
+        <div class="movement-item__trailing">
+          <span class="movement-item__amount movement-item__amount--uscita">-€ 34,00</span>
+          <button
+            class="movement-item__delete-btn"
+            aria-label="Elimina movimento Ristoranti del 20/09/2026"
+            onclick="if(confirm('Eliminare?')) window.history.back()"
+          >
+            <span class="material-symbols-outlined">delete</span>
+          </button>
+        </div>
+      </li>
+
+      <!-- Movimento 4: Abbonamenti – Uscita -->
+      <li class="movement-item">
+        <div class="movement-item__leading">
+          <span class="chip chip--uscita">Uscita</span>
+        </div>
+        <div class="movement-item__content">
+          <div class="movement-item__headline">Abbonamenti</div>
+          <div class="movement-item__supporting">19/09/2026</div>
+        </div>
+        <div class="movement-item__trailing">
+          <span class="movement-item__amount movement-item__amount--uscita">-€ 12,90</span>
+          <button
+            class="movement-item__delete-btn"
+            aria-label="Elimina movimento Abbonamenti del 19/09/2026"
+            onclick="if(confirm('Eliminare?')) window.history.back()"
+          >
+            <span class="material-symbols-outlined">delete</span>
+          </button>
+        </div>
+      </li>
+
+      <!-- Movimento 5: Trasporti – Uscita -->
+      <li class="movement-item">
+        <div class="movement-item__leading">
+          <span class="chip chip--uscita">Uscita</span>
+        </div>
+        <div class="movement-item__content">
+          <div class="movement-item__headline">Trasporti</div>
+          <div class="movement-item__supporting">18/09/2026</div>
+        </div>
+        <div class="movement-item__trailing">
+          <span class="movement-item__amount movement-item__amount--uscita">-€ 45,00</span>
+          <button
+            class="movement-item__delete-btn"
+            aria-label="Elimina movimento Trasporti del 18/09/2026"
+            onclick="if(confirm('Eliminare?')) window.history.back()"
+          >
+            <span class="material-symbols-outlined">delete</span>
+          </button>
+        </div>
+      </li>
+
+    </ul>
+  </div>
+
+  <!-- MD3 Navigation Bar -->
+  <nav class="nav-bar" aria-label="Navigazione principale">
+    <div class="nav-bar__inner">
+
+      <a href="dashboard.html" class="nav-bar__item" aria-label="Dashboard">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span class="nav-bar__label">Dashboard</span>
+      </a>
+
+      <a href="home.html" class="nav-bar__item nav-bar__item--active" aria-current="page" aria-label="Conti">
+        <div class="nav-bar__indicator" aria-hidden="true"></div>
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+        <span class="nav-bar__label">Conti</span>
+      </a>
+
+    </div>
+  </nav>
+
+</body>
+</html>

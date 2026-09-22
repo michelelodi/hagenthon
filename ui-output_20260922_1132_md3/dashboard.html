@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – Finanze di Famiglia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <style>
+    /* ── CSS Tokens ─────────────────────────────────────────── */
+    :root {
+      --md-primary: #0061A4;
+      --md-on-primary: #FFFFFF;
+      --md-primary-container: #D1E4FF;
+      --md-on-primary-container: #001D36;
+      --md-secondary: #535F70;
+      --md-secondary-container: #D1E4FF;
+      --md-surface: #FDFCFF;
+      --md-surface-variant: #DFE2EB;
+      --md-on-surface: #1A1C1E;
+      --md-on-surface-variant: #43474E;
+      --md-outline: #73777F;
+      --md-outline-variant: #C3C7CF;
+      --md-error: #BA1A1A;
+      --md-success: #386A20;
+      --font: 'Roboto', sans-serif;
+      --shape-xs: 4px;
+      --shape-sm: 8px;
+      --shape-md: 12px;
+      --shape-lg: 16px;
+      --shape-xl: 28px;
+      --shape-full: 50%;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --spacing-2xl: 48px;
+      --elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+      --elevation-2: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
+      --nav-bar-height: 80px;
+    }
+
+    /* ── Reset & Base ───────────────────────────────────────── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font);
+      background-color: var(--md-surface-variant);
+      padding-bottom: var(--nav-bar-height);
+      color: var(--md-on-surface);
+    }
+
+    .page-wrapper {
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* ── Top App Bar ────────────────────────────────────────── */
+    .top-app-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--md-surface);
+      padding: var(--spacing-md) var(--spacing-md);
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: var(--elevation-1);
+    }
+
+    .top-app-bar__title {
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--md-on-surface);
+      line-height: 1.27;
+    }
+
+    /* ── Filter Chip ────────────────────────────────────────── */
+    .filter-chip {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      border: 1px solid var(--md-outline);
+      border-radius: 20px;
+      padding: 6px 12px;
+      background-color: transparent;
+      cursor: pointer;
+    }
+
+    .filter-chip__label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-on-surface-variant);
+    }
+
+    .filter-chip .material-symbols-outlined {
+      font-size: 18px;
+      color: var(--md-on-surface-variant);
+    }
+
+    .filter-chip select {
+      border: none;
+      background: transparent;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-on-surface-variant);
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+    }
+
+    /* ── Segmented Button ───────────────────────────────────── */
+    .segmented-button {
+      display: flex;
+      align-items: center;
+      margin: var(--spacing-md);
+      border: 1px solid var(--md-outline);
+      border-radius: 20px;
+      overflow: hidden;
+      background-color: var(--md-surface);
+    }
+
+    .segmented-button__option {
+      flex: 1;
+      text-align: center;
+      padding: 10px var(--spacing-md);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-on-surface-variant);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      border-radius: 0;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .segmented-button__option + .segmented-button__option {
+      border-left: 1px solid var(--md-outline);
+    }
+
+    .segmented-button__option--active {
+      background-color: var(--md-secondary-container);
+      color: var(--md-on-primary-container);
+      border-radius: 20px;
+    }
+
+    /* ── Elevated Card ──────────────────────────────────────── */
+    .card-elevated {
+      background-color: var(--md-surface);
+      border-radius: var(--shape-md);
+      box-shadow: var(--elevation-1);
+      margin: var(--spacing-md);
+    }
+
+    /* ── Saldo Totale Card ──────────────────────────────────── */
+    .card-saldo {
+      padding: var(--spacing-md) var(--spacing-lg);
+    }
+
+    .card-saldo__label {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--md-on-surface-variant);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .card-saldo__value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--md-primary);
+      line-height: 1.2;
+    }
+
+    /* ── Spese Categoria Card ───────────────────────────────── */
+    .card-chart {
+      padding: var(--spacing-md);
+    }
+
+    .card-chart__title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--md-on-surface);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .chart-donut-wrapper {
+      position: relative;
+      max-width: 260px;
+      margin: 0 auto var(--spacing-md);
+    }
+
+    .chart-donut-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .chart-donut-center__label {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--md-on-surface-variant);
+      display: block;
+    }
+
+    .chart-donut-center__value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--md-on-surface);
+      display: block;
+    }
+
+    /* ── Custom Legend ──────────────────────────────────────── */
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-sm) var(--spacing-md);
+      margin-top: var(--spacing-sm);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      min-width: 140px;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: var(--shape-full);
+      flex-shrink: 0;
+    }
+
+    .legend-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .legend-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--md-on-surface);
+    }
+
+    .legend-meta {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--md-on-surface-variant);
+    }
+
+    /* ── Trend Card ─────────────────────────────────────────── */
+    .card-trend {
+      padding: var(--spacing-md);
+    }
+
+    .card-trend__title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--md-on-surface);
+      margin-bottom: var(--spacing-md);
+    }
+
+    /* ── Navigation Bar ─────────────────────────────────────── */
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-bar-height);
+      background-color: var(--md-surface);
+      display: flex;
+      justify-content: center;
+      z-index: 20;
+      box-shadow: 0 -1px 3px rgba(0,0,0,0.12);
+    }
+
+    .nav-bar__inner {
+      max-width: 600px;
+      width: 100%;
+      display: flex;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      text-decoration: none;
+      color: var(--md-on-surface-variant);
+      position: relative;
+      padding-top: var(--spacing-sm);
+    }
+
+    .nav-item__icon-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 32px;
+    }
+
+    .nav-item__indicator {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 64px;
+      height: 32px;
+      border-radius: var(--shape-full);
+      background-color: transparent;
+      transition: background-color 0.2s;
+    }
+
+    .nav-item--active .nav-item__indicator {
+      background-color: var(--md-secondary-container);
+    }
+
+    .nav-item .material-symbols-outlined {
+      font-size: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .nav-item--active .material-symbols-outlined,
+    .nav-item--active .nav-item__label {
+      color: var(--md-on-primary-container);
+      font-variation-settings: 'FILL' 1;
+    }
+
+    .nav-item__label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--md-on-surface-variant);
+    }
+
+    .nav-item--active .nav-item__label {
+      font-weight: 700;
+    }
+  
+    @media (min-width: 840px) {
+      .page-wrapper { max-width: 840px; }
+    }
+    @media (min-width: 1240px) {
+      .page-wrapper { max-width: 1024px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <!-- ── Top App Bar ── -->
+    <header class="top-app-bar">
+      <span class="top-app-bar__title">Dashboard</span>
+      <div class="filter-chip" role="group" aria-label="Filtra per conto">
+        <span class="material-symbols-outlined" aria-hidden="true">filter_list</span>
+        <select aria-label="Seleziona conto">
+          <option>Tutti i conti</option>
+          <option>Conto Principale</option>
+          <option>Conto Risparmio</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- ── Segmented Button — Periodo ── -->
+    <div class="segmented-button" role="group" aria-label="Seleziona periodo">
+      <button class="segmented-button__option segmented-button__option--active" type="button" aria-pressed="true">Mese</button>
+      <button class="segmented-button__option" type="button" aria-pressed="false">Trimestre</button>
+      <button class="segmented-button__option" type="button" aria-pressed="false">Anno</button>
+    </div>
+
+    <!-- ── Card: Saldo totale ── -->
+    <section class="card-elevated card-saldo" aria-label="Saldo totale">
+      <p class="card-saldo__label">Saldo totale</p>
+      <p class="card-saldo__value">€ 2.579,70</p>
+    </section>
+
+    <!-- ── Card: Spese per categoria ── -->
+    <section class="card-elevated card-chart" aria-label="Spese per categoria">
+      <h2 class="card-chart__title">Spese per categoria</h2>
+      <div class="chart-donut-wrapper">
+        <canvas id="pieChart" width="260" height="260" aria-label="Grafico a ciambella spese per categoria" role="img"></canvas>
+        <div class="chart-donut-center" aria-hidden="true">
+          <span class="chart-donut-center__label">Totale</span>
+          <span class="chart-donut-center__value">€ 1.448,70</span>
+        </div>
+      </div>
+      <!-- Custom legend -->
+      <div class="chart-legend" role="list" aria-label="Legenda categorie">
+        <div class="legend-item" role="listitem">
+          <span class="legend-dot" style="background-color:#0061A4;" aria-hidden="true"></span>
+          <div class="legend-text">
+            <span class="legend-name">Casa</span>
+            <span class="legend-meta">€ 800,00 · 55%</span>
+          </div>
+        </div>
+        <div class="legend-item" role="listitem">
+          <span class="legend-dot" style="background-color:#D1E4FF;" aria-hidden="true"></span>
+          <div class="legend-text">
+            <span class="legend-name">Spesa</span>
+            <span class="legend-meta">€ 320,00 · 22%</span>
+          </div>
+        </div>
+        <div class="legend-item" role="listitem">
+          <span class="legend-dot" style="background-color:#535F70;" aria-hidden="true"></span>
+          <div class="legend-text">
+            <span class="legend-name">Ristoranti</span>
+            <span class="legend-meta">€ 145,00 · 10%</span>
+          </div>
+        </div>
+        <div class="legend-item" role="listitem">
+          <span class="legend-dot" style="background-color:#73777F;" aria-hidden="true"></span>
+          <div class="legend-text">
+            <span class="legend-name">Trasporti</span>
+            <span class="legend-meta">€ 90,00 · 6%</span>
+          </div>
+        </div>
+        <div class="legend-item" role="listitem">
+          <span class="legend-dot" style="background-color:#1A1C1E;" aria-hidden="true"></span>
+          <div class="legend-text">
+            <span class="legend-name">Abbonamenti</span>
+            <span class="legend-meta">€ 38,70 · 3%</span>
+          </div>
+        </div>
+        <div class="legend-item" role="listitem">
+          <span class="legend-dot" style="background-color:#C3C7CF;" aria-hidden="true"></span>
+          <div class="legend-text">
+            <span class="legend-name">Altro</span>
+            <span class="legend-meta">€ 55,00 · 4%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Card: Trend mensile ── -->
+    <section class="card-elevated card-trend" aria-label="Trend mensile entrate e uscite">
+      <h2 class="card-trend__title">Trend mensile</h2>
+      <canvas id="barChart" aria-label="Grafico a barre trend mensile" role="img"></canvas>
+    </section>
+
+  </div><!-- /page-wrapper -->
+
+  <!-- ── Navigation Bar ── -->
+  <nav class="nav-bar" aria-label="Navigazione principale">
+    <div class="nav-bar__inner">
+      <a class="nav-item nav-item--active" href="dashboard.html" aria-current="page" aria-label="Dashboard">
+        <div class="nav-item__icon-wrapper">
+          <span class="nav-item__indicator" aria-hidden="true"></span>
+          <span class="material-symbols-outlined" aria-hidden="true">bar_chart</span>
+        </div>
+        <span class="nav-item__label">Dashboard</span>
+      </a>
+      <a class="nav-item" href="home.html" aria-label="Conti">
+        <div class="nav-item__icon-wrapper">
+          <span class="nav-item__indicator" aria-hidden="true"></span>
+          <span class="material-symbols-outlined" aria-hidden="true">account_balance_wallet</span>
+        </div>
+        <span class="nav-item__label">Conti</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Chart.js CDN — must be before chart init scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    /* ── Segmented Button interaction ── */
+    document.querySelectorAll('.segmented-button__option').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.segmented-button__option').forEach(function(b) {
+          b.classList.remove('segmented-button__option--active');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('segmented-button__option--active');
+        btn.setAttribute('aria-pressed', 'true');
+      });
+    });
+
+    /* ── Doughnut chart — Spese per categoria ── */
+    (function() {
+      var ctx = document.getElementById('pieChart').getContext('2d');
+
+      new Chart(ctx, {
+        type: 'doughnut',
+        plugins: [],
+        data: {
+          labels: ['Casa', 'Spesa', 'Ristoranti', 'Trasporti', 'Abbonamenti', 'Altro'],
+          datasets: [{
+            data: [800, 320, 145, 90, 38.70, 55],
+            backgroundColor: ['#0061A4', '#D1E4FF', '#535F70', '#73777F', '#1A1C1E', '#C3C7CF'],
+            borderColor: '#FDFCFF',
+            borderWidth: 2,
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          cutout: '62%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  var value = context.parsed;
+                  var total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                  var pct = Math.round((value / total) * 100);
+                  return ' € ' + value.toFixed(2).replace('.', ',') + ' · ' + pct + '%';
+                }
+              }
+            }
+          }
+        }
+      });
+    })();
+
+    /* ── Bar chart — Trend mensile ── */
+    (function() {
+      var ctx = document.getElementById('barChart').getContext('2d');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set'],
+          datasets: [
+            {
+              label: 'Entrate',
+              data: [1800, 1800, 2100, 1800, 1800, 1800],
+              backgroundColor: '#386A20',
+              borderRadius: 4,
+              borderSkipped: false
+            },
+            {
+              label: 'Uscite',
+              data: [1200, 1450, 1600, 980, 1320, 1449],
+              backgroundColor: '#BA1A1A',
+              borderRadius: 4,
+              borderSkipped: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                font: { family: 'Roboto, sans-serif', size: 12 },
+                color: '#43474E',
+                usePointStyle: true,
+                pointStyle: 'circle',
+                padding: 16
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return ' ' + context.dataset.label + ': € ' +
+                    context.parsed.y.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                font: { family: 'Roboto, sans-serif', size: 12 },
+                color: '#43474E'
+              }
+            },
+            y: {
+              grid: { color: '#DFE2EB' },
+              border: { display: false },
+              ticks: {
+                font: { family: 'Roboto, sans-serif', size: 11 },
+                color: '#43474E',
+                callback: function(value) {
+                  return '€ ' + value.toLocaleString('it-IT');
+                }
+              }
+            }
+          }
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

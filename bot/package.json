@@ -1,0 +1,18 @@
+{
+  "name": "finanze-telegram-bot",
+  "version": "1.0.0",
+  "description": "Bot Telegram per importare scontrini nelle finanze di famiglia",
+  "type": "module",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "node --watch bot.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.54.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "node-telegram-bot-api": "^0.66.0"
+  }
+}

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nuovo Movimento — Finanze di Famiglia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <style>
+    :root {
+      --md-primary: #0061A4;
+      --md-on-primary: #FFFFFF;
+      --md-primary-container: #D1E4FF;
+      --md-on-primary-container: #001D36;
+      --md-secondary-container: #D8E2F9;
+      --md-on-secondary-container: #131C2B;
+      --md-surface: #FDFCFF;
+      --md-surface-variant: #DFE2EB;
+      --md-on-surface: #1A1C1E;
+      --md-on-surface-variant: #43474E;
+      --md-outline: #73777F;
+      --md-outline-variant: #C3C7CF;
+      --md-error: #BA1A1A;
+      --md-error-container: #FFDAD6;
+      --md-success: #386A20;
+      --md-success-container: #C0EFAA;
+      --font: 'Roboto', sans-serif;
+      --shape-xs: 4px;
+      --shape-sm: 8px;
+      --shape-md: 12px;
+      --shape-lg: 16px;
+      --shape-xl: 28px;
+      --shape-full: 50%;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --spacing-2xl: 48px;
+      --elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--md-surface);
+      color: var(--md-on-surface);
+      min-height: 100vh;
+    }
+
+    .page-wrapper {
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* ── Top App Bar ── */
+    .top-app-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      padding: var(--spacing-sm) var(--spacing-xs);
+      background: var(--md-surface);
+      height: 64px;
+    }
+
+    .top-app-bar__leading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: var(--shape-full);
+      color: var(--md-on-surface);
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .top-app-bar__leading:hover {
+      background: rgba(26, 28, 30, 0.08);
+    }
+
+    .top-app-bar__leading:active {
+      background: rgba(26, 28, 30, 0.12);
+    }
+
+    .top-app-bar__title {
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--md-on-surface);
+      line-height: 1.27;
+    }
+
+    .material-symbols-outlined {
+      font-size: 24px;
+      line-height: 1;
+      user-select: none;
+    }
+
+    /* ── Main content ── */
+    .main-content {
+      padding: var(--spacing-md);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--md-on-surface-variant);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    /* ── Segmented Button ── */
+    .segmented-button-group {
+      display: flex;
+      width: 100%;
+      border-radius: var(--shape-full);
+      overflow: hidden;
+      border: 1px solid var(--md-outline);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .segmented-button {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+      padding: 10px var(--spacing-md);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.1px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--md-on-surface-variant);
+      transition: background 0.2s, color 0.2s;
+      min-height: 40px;
+    }
+
+    .segmented-button:first-child {
+      border-right: 1px solid var(--md-outline);
+    }
+
+    .segmented-button--active {
+      background: var(--md-secondary-container);
+      color: var(--md-on-secondary-container);
+    }
+
+    .segmented-button--active .material-symbols-outlined {
+      color: var(--md-on-secondary-container);
+    }
+
+    .segmented-button:not(.segmented-button--active):hover {
+      background: rgba(0, 97, 164, 0.08);
+    }
+
+    .segmented-button:not(.segmented-button--active):active {
+      background: rgba(0, 97, 164, 0.12);
+    }
+
+    /* ── Outlined Text Field ── */
+    .text-field {
+      position: relative;
+      width: 100%;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .text-field--last {
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .text-field__input-row {
+      position: relative;
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--md-outline);
+      border-radius: var(--shape-xs);
+      background: var(--md-surface);
+      transition: border-color 0.2s;
+    }
+
+    .text-field__input-row:focus-within {
+      border-width: 2px;
+      border-color: var(--md-primary);
+    }
+
+    .text-field__leading-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-left: var(--spacing-md);
+      padding-right: var(--spacing-sm);
+      color: var(--md-on-surface-variant);
+      pointer-events: none;
+      flex-shrink: 0;
+    }
+
+    .text-field__input-row:focus-within .text-field__leading-icon {
+      color: var(--md-primary);
+    }
+
+    .text-field__inner {
+      position: relative;
+      flex: 1;
+      padding-top: 20px;
+      padding-bottom: 8px;
+      padding-right: var(--spacing-md);
+    }
+
+    .text-field__inner--no-leading {
+      padding-left: var(--spacing-md);
+    }
+
+    .text-field__input {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-family: var(--font);
+      font-size: 16px;
+      color: var(--md-on-surface);
+      line-height: 1.5;
+    }
+
+    .text-field__input::placeholder {
+      color: transparent;
+    }
+
+    .text-field__label {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: var(--md-on-surface-variant);
+      pointer-events: none;
+      transition: top 0.15s ease, font-size 0.15s ease, color 0.15s ease;
+      transform-origin: left center;
+      white-space: nowrap;
+    }
+
+    .text-field__input:focus ~ .text-field__label,
+    .text-field__input:not(:placeholder-shown) ~ .text-field__label,
+    .text-field__input[type="date"] ~ .text-field__label {
+      top: 4px;
+      font-size: 12px;
+      transform: translateY(0);
+    }
+
+    .text-field__input-row:focus-within .text-field__label {
+      color: var(--md-primary);
+    }
+
+    /* Select field */
+    .text-field__select {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-family: var(--font);
+      font-size: 16px;
+      color: var(--md-on-surface);
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      line-height: 1.5;
+    }
+
+    .text-field__select option {
+      background: var(--md-surface);
+      color: var(--md-on-surface);
+    }
+
+    .text-field__trailing-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-right: var(--spacing-md);
+      color: var(--md-on-surface-variant);
+      pointer-events: none;
+      flex-shrink: 0;
+    }
+
+    /* ── Action Row ── */
+    .action-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-sm);
+      margin-top: var(--spacing-xs);
+    }
+
+    /* MD3 Text Button */
+    .btn-text {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px var(--spacing-md);
+      border-radius: var(--shape-full);
+      border: none;
+      background: transparent;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.1px;
+      color: var(--md-primary);
+      cursor: pointer;
+      text-decoration: none;
+      min-height: 40px;
+      transition: background 0.2s;
+    }
+
+    .btn-text:hover {
+      background: rgba(0, 97, 164, 0.08);
+    }
+
+    .btn-text:active {
+      background: rgba(0, 97, 164, 0.12);
+    }
+
+    /* MD3 Filled Button */
+    .btn-filled {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px var(--spacing-lg);
+      border-radius: var(--shape-full);
+      border: none;
+      background: var(--md-primary);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.1px;
+      color: var(--md-on-primary);
+      cursor: pointer;
+      text-decoration: none;
+      min-height: 40px;
+      box-shadow: var(--elevation-1);
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-filled:hover {
+      background: #1a71b0;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
+    }
+
+    .btn-filled:active {
+      background: #2a7dbf;
+      box-shadow: none;
+    }
+  
+    @media (min-width: 840px) {
+      .page-wrapper { max-width: 840px; }
+    }
+    @media (min-width: 1240px) {
+      .page-wrapper { max-width: 1024px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <!-- Top App Bar -->
+    <header class="top-app-bar">
+      <a href="dettaglio-conto.html" class="top-app-bar__leading" aria-label="Indietro">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <h1 class="top-app-bar__title">Nuovo movimento</h1>
+    </header>
+
+    <!-- Main content -->
+    <main class="main-content">
+
+      <!-- Segmented Button — Tipo -->
+      <p class="section-label">Tipo</p>
+      <div class="segmented-button-group" role="group" aria-label="Tipo movimento">
+        <button
+          class="segmented-button segmented-button--active"
+          id="btn-uscita"
+          type="button"
+          aria-pressed="true"
+          onclick="setTipo('uscita')"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">trending_down</span>
+          Uscita
+        </button>
+        <button
+          class="segmented-button"
+          id="btn-entrata"
+          type="button"
+          aria-pressed="false"
+          onclick="setTipo('entrata')"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">trending_up</span>
+          Entrata
+        </button>
+      </div>
+
+      <!-- Importo -->
+      <div class="text-field">
+        <div class="text-field__input-row">
+          <span class="text-field__leading-icon material-symbols-outlined" aria-hidden="true">euro</span>
+          <div class="text-field__inner">
+            <input
+              class="text-field__input"
+              id="importo"
+              type="number"
+              min="0.01"
+              step="0.01"
+              placeholder=" "
+              inputmode="decimal"
+              autocomplete="off"
+            />
+            <label class="text-field__label" for="importo">Importo (€)</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data -->
+      <div class="text-field">
+        <div class="text-field__input-row">
+          <span class="text-field__leading-icon material-symbols-outlined" aria-hidden="true">calendar_today</span>
+          <div class="text-field__inner">
+            <input
+              class="text-field__input"
+              id="data"
+              type="date"
+              placeholder=" "
+            />
+            <label class="text-field__label" for="data">Data</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categoria -->
+      <div class="text-field text-field--last">
+        <div class="text-field__input-row">
+          <div class="text-field__inner text-field__inner--no-leading">
+            <select class="text-field__select" id="categoria" aria-label="Categoria">
+              <!-- populated by JS -->
+            </select>
+            <label class="text-field__label" for="categoria">Categoria</label>
+          </div>
+          <span class="text-field__trailing-icon material-symbols-outlined" aria-hidden="true">expand_more</span>
+        </div>
+      </div>
+
+      <!-- Action Row -->
+      <div class="action-row">
+        <a href="dettaglio-conto.html" class="btn-text">Annulla</a>
+        <button class="btn-filled" type="button" id="btn-salva" onclick="salva()">Salva</button>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    const CATEGORIE = {
+      uscita: [
+        'Casa', 'Spesa', 'Ristoranti', 'Trasporti',
+        'Salute', 'Abbigliamento', 'Svago', 'Istruzione',
+        'Abbonamenti', 'Altro'
+      ],
+      entrata: ['Stipendio', 'Rimborso', 'Regalo', 'Altro']
+    };
+
+    let tipoCorrente = 'uscita';
+
+    function setTipo(tipo) {
+      tipoCorrente = tipo;
+
+      const btnUscita = document.getElementById('btn-uscita');
+      const btnEntrata = document.getElementById('btn-entrata');
+
+      if (tipo === 'uscita') {
+        btnUscita.classList.add('segmented-button--active');
+        btnUscita.setAttribute('aria-pressed', 'true');
+        btnEntrata.classList.remove('segmented-button--active');
+        btnEntrata.setAttribute('aria-pressed', 'false');
+      } else {
+        btnEntrata.classList.add('segmented-button--active');
+        btnEntrata.setAttribute('aria-pressed', 'true');
+        btnUscita.classList.remove('segmented-button--active');
+        btnUscita.setAttribute('aria-pressed', 'false');
+      }
+
+      popolaCategorie(tipo);
+    }
+
+    function popolaCategorie(tipo) {
+      const select = document.getElementById('categoria');
+      const opzioni = CATEGORIE[tipo] || [];
+      select.innerHTML = '';
+      opzioni.forEach(function(cat) {
+        const opt = document.createElement('option');
+        opt.value = cat.toLowerCase();
+        opt.textContent = cat;
+        select.appendChild(opt);
+      });
+    }
+
+    function impostaDataOggi() {
+      const oggi = new Date();
+      const anno = oggi.getFullYear();
+      const mese = String(oggi.getMonth() + 1).padStart(2, '0');
+      const giorno = String(oggi.getDate()).padStart(2, '0');
+      document.getElementById('data').value = anno + '-' + mese + '-' + giorno;
+    }
+
+    function salva() {
+      window.location.href = 'dettaglio-conto.html';
+    }
+
+    // Init
+    impostaDataOggi();
+    popolaCategorie('uscita');
+  </script>
+</body>
+</html>
