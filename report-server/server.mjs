@@ -12,9 +12,47 @@
 // Zero dipendenze: solo built-in Node + tools/askclaude (a sua volta zero-dep).
 
 import http from 'node:http';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { dirname, join, normalize, extname } from 'node:path';
 import { askClaude } from '../tools/askclaude/askclaude.mjs';
 
 const PORT = process.env.PORT || 3002;
+
+// Serve anche la webapp statica, così un solo processo = app + report.
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const STATIC_DIR = process.env.STATIC_DIR || join(__dirname, '..', 'ui-output_20260922_1132_md3');
+
+const CONTENT_TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.ico': 'image/x-icon'
+};
+
+async function serveStatic(req, res) {
+  // Ricava un path sicuro dentro STATIC_DIR (niente traversal).
+  var urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
+  if (urlPath === '/' || urlPath === '') urlPath = '/login.html';
+  var filePath = normalize(join(STATIC_DIR, urlPath));
+  if (!filePath.startsWith(STATIC_DIR)) {
+    res.writeHead(403); res.end('Forbidden'); return;
+  }
+  try {
+    var buf = await readFile(filePath);
+    res.writeHead(200, { 'Content-Type': CONTENT_TYPES[extname(filePath).toLowerCase()] || 'application/octet-stream' });
+    res.end(buf);
+  } catch {
+    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Not found');
+  }
+}
 
 const SYSTEM = [
   'Sei un assistente che aiuta una famiglia italiana a capire le proprie finanze personali.',
@@ -113,13 +151,20 @@ const server = http.createServer(async function (req, res) {
     return;
   }
 
+  // Tutto il resto (GET): la webapp statica.
+  if (req.method === 'GET') {
+    await serveStatic(req, res);
+    return;
+  }
+
   sendJson(res, 404, { ok: false, error: 'not found' });
 });
 
 server.listen(PORT, function () {
-  console.log('\n📊 report-server in ascolto su http://localhost:' + PORT);
-  console.log('   POST /report  { analysis }  → report testuale via askclaude');
-  console.log('   GET  /health\n');
+  console.log('\n📊 Finanze di Famiglia — app + report su http://localhost:' + PORT);
+  console.log('   Apri:  http://localhost:' + PORT + '/login.html');
+  console.log('   API:   POST /report  { analysis }  ·  GET /health');
+  console.log('   Static: ' + STATIC_DIR + '\n');
   console.log('Suggerimento: per un test offline/deterministico esporta');
   console.log('  ASKCLAUDE_CLAUDE_BIN=../tools/askclaude/test/stub-bin.mjs e ASKCLAUDE_STUB_STDOUT=\'{"result":"...","subtype":"success"}\'\n');
 });

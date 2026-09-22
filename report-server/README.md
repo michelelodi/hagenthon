@@ -14,15 +14,25 @@ Genera il **report AI** in linguaggio naturale sulle finanze della famiglia.
 
 Vedi [ADR-0002](../docs/adr/0002-report-ai-opzionale-via-askclaude.md).
 
-## Avvio
+## Avvio (un solo comando = app + report)
 
 ```bash
 node report-server/server.mjs
 ```
 
-- Porta `3002` (override con `PORT`).
+Poi apri **http://localhost:3002/login.html**.
+
+Questo server **serve anche la webapp statica** (la cartella `ui-output_.../`), quindi con un
+unico processo hai sia le pagine sia l'endpoint del report: il pulsante "Genera report AI" chiama
+`/report` **sulla stessa origine**, senza CORS e senza un server separato da avviare a mano.
+
+- Porta `3002` (override con `PORT`); cartella statica override con `STATIC_DIR`.
 - Zero dipendenze: solo built-in Node + `tools/askclaude` (a sua volta zero-dep).
-- Usa il CLI `claude` (login/subscription dell'utente).
+- Usa il CLI `claude` (login/subscription dell'utente) per generare il report.
+
+> Il browser non può avviare un processo locale: per questo l'app è servita **dallo stesso**
+> processo del report. Se invece apri le pagine da un altro server statico (es. `python -m http.server`),
+> il pulsante tenta comunque il fallback su `http://localhost:3002/report`.
 
 ## Endpoint
 

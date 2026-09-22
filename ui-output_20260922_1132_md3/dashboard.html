@@ -608,7 +608,28 @@
     var contoFilter = '';   // '' = tutti i conti
     var pieChart = null;
     var ultimaAnalisi = null;       // ultimo risultato di analizza() per il report AI
-    var REPORT_API = 'http://localhost:3002';
+    // Se la webapp è servita dal report-server, /report è same-origin; altrimenti
+    // (es. aperta da un altro server statico) si prova il server sulla porta 3002.
+    var REPORT_ENDPOINTS = ['/report'];
+    if (location.port !== '3002') REPORT_ENDPOINTS.push('http://localhost:3002/report');
+
+    async function chiediReport(payload) {
+      var lastErr = null;
+      for (var i = 0; i < REPORT_ENDPOINTS.length; i++) {
+        try {
+          var res = await fetch(REPORT_ENDPOINTS[i], {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: AbortSignal.timeout(50000)
+          });
+          var data = await res.json();
+          if (!res.ok || !data.ok) throw new Error((data && data.error) || ('HTTP ' + res.status));
+          return data;
+        } catch (e) { lastErr = e; }
+      }
+      throw lastErr || new Error('nessun endpoint report disponibile');
+    }
 
     function escHtmlDash(s) {
       return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -780,21 +801,14 @@
       out.textContent = 'Sto analizzando i tuoi dati…';
 
       try {
-        var res = await fetch(REPORT_API + '/report', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ analysis: ultimaAnalisi }),
-          signal: AbortSignal.timeout(50000)
-        });
-        var data = await res.json();
-        if (!res.ok || !data.ok) throw new Error((data && data.error) || ('HTTP ' + res.status));
+        var data = await chiediReport({ analysis: ultimaAnalisi });
         out.className = 'report-out';
         out.textContent = data.report;
       } catch (e) {
         out.className = 'report-out report-out--error';
-        out.textContent = 'Report non disponibile: il server non risponde su localhost:3002. ' +
-          'Avvialo con "node report-server/server.mjs" (richiede il CLI claude). ' +
-          'Gli insight qui sopra restano sempre disponibili offline.';
+        out.textContent = 'Report non disponibile: il servizio non risponde. ' +
+          'Avvia l\'app con "node report-server/server.mjs" e aprila su http://localhost:3002/login.html ' +
+          '(il report richiede il CLI claude). Gli insight qui sopra restano sempre disponibili offline.';
       } finally {
         btn.disabled = false;
         btn.innerHTML = testoOriginale;
