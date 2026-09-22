@@ -377,7 +377,7 @@
       <a href="dettaglio-conto.html" id="back-link" class="top-app-bar__leading" aria-label="Indietro">
         <span class="material-symbols-outlined">arrow_back</span>
       </a>
-      <h1 class="top-app-bar__title">Nuovo movimento</h1>
+      <h1 class="top-app-bar__title" id="page-title">Nuovo movimento</h1>
     </header>
 
     <!-- Main content -->
@@ -445,7 +445,7 @@
       </div>
 
       <!-- Categoria -->
-      <div class="text-field text-field--last">
+      <div class="text-field">
         <div class="text-field__input-row">
           <div class="text-field__inner text-field__inner--no-leading">
             <select class="text-field__select" id="categoria" aria-label="Categoria">
@@ -454,6 +454,24 @@
             <label class="text-field__label" for="categoria">Categoria</label>
           </div>
           <span class="text-field__trailing-icon material-symbols-outlined" aria-hidden="true">expand_more</span>
+        </div>
+      </div>
+
+      <!-- Descrizione (opzionale) -->
+      <div class="text-field text-field--last">
+        <div class="text-field__input-row">
+          <span class="text-field__leading-icon material-symbols-outlined" aria-hidden="true">notes</span>
+          <div class="text-field__inner">
+            <input
+              class="text-field__input"
+              id="descrizione"
+              type="text"
+              maxlength="60"
+              placeholder=" "
+              autocomplete="off"
+            />
+            <label class="text-field__label" for="descrizione">Descrizione (opzionale)</label>
+          </div>
         </div>
       </div>
 
@@ -471,14 +489,25 @@
   </div>
 
   <script>
-    // Categorie fisse condivise da storage.js (una lista per tipo).
-    var contoId = new URLSearchParams(window.location.search).get('contoId');
+    // Modalità: creazione (contoId) oppure modifica (movId). Categorie da storage.js.
+    var params = new URLSearchParams(window.location.search);
+    var movId = params.get('movId');
+    var backParam = params.get('back'); // 'home' → torna ai conti, altrimenti al dettaglio
+    var contoId = params.get('contoId');
+    var movimento = null;
 
+    if (movId) {
+      movimento = getMovimenti().find(function (m) { return m.id === movId; }) || null;
+      if (!movimento) { window.location.replace('home.html'); }
+      else { contoId = movimento.contoId; }
+    }
     // contoId mancante o inesistente → torna alla home.
     if (!contoId || !getConto(contoId)) { window.location.replace('home.html'); }
 
-    // I link indietro/annulla tornano al dettaglio del conto corrente.
-    var backHref = 'dettaglio-conto.html?id=' + encodeURIComponent(contoId);
+    // I link indietro/annulla tornano da dove sei arrivato.
+    var backHref = backParam === 'home'
+      ? 'home.html'
+      : 'dettaglio-conto.html?id=' + encodeURIComponent(contoId);
     document.getElementById('back-link').href = backHref;
     document.getElementById('cancel-link').href = backHref;
 
@@ -533,8 +562,9 @@
       var importo = parseFloat(document.getElementById('importo').value);
       var data = document.getElementById('data').value;
       var categoria = document.getElementById('categoria').value;
+      var descrizione = document.getElementById('descrizione').value.trim();
 
-      // Validazione (ticket 04): importo > 0, data valida non troppo nel futuro, categoria obbligatoria.
+      // Validazione: importo > 0, data valida non troppo nel futuro, categoria obbligatoria.
       if (isNaN(importo) || importo <= 0) {
         mostraErrore("Inserisci un importo maggiore di zero.");
         return;
@@ -554,20 +584,35 @@
         return;
       }
 
-      createMovimento({
-        contoId: contoId,
-        tipo: tipoCorrente,
-        importo: importo,
-        data: data,
-        categoria: categoria,
-        fonte: 'manuale'
-      });
+      if (movId) {
+        updateMovimento(movId, {
+          tipo: tipoCorrente, importo: importo, data: data,
+          categoria: categoria, descrizione: descrizione
+        });
+      } else {
+        createMovimento({
+          contoId: contoId, tipo: tipoCorrente, importo: importo, data: data,
+          categoria: categoria, descrizione: descrizione, fonte: 'manuale'
+        });
+      }
       window.location.href = backHref;
     }
 
     // Init
-    impostaDataOggi();
-    popolaCategorie('uscita');
+    if (movimento) {
+      // Modalità modifica: precompila i campi dal movimento esistente.
+      document.getElementById('page-title').textContent = 'Modifica movimento';
+      document.title = 'Modifica movimento — Finanze di Famiglia';
+      document.getElementById('btn-salva').textContent = 'Salva modifiche';
+      setTipo(movimento.tipo);                                   // popola anche le categorie
+      document.getElementById('importo').value = movimento.importo;
+      document.getElementById('data').value = movimento.data;
+      document.getElementById('categoria').value = movimento.categoria;
+      document.getElementById('descrizione').value = movimento.descrizione || '';
+    } else {
+      impostaDataOggi();
+      popolaCategorie('uscita');
+    }
   </script>
 </body>
 </html>

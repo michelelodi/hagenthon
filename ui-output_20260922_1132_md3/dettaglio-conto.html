@@ -223,7 +223,8 @@
       color: var(--md-error);
     }
 
-    .movement-item__delete-btn {
+    .movement-item__delete-btn,
+    .movement-item__edit-btn {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -239,11 +240,13 @@
       flex-shrink: 0;
     }
 
-    .movement-item__delete-btn:hover {
+    .movement-item__delete-btn:hover,
+    .movement-item__edit-btn:hover {
       background-color: var(--md-surface-variant);
     }
 
-    .movement-item__delete-btn .material-symbols-outlined {
+    .movement-item__delete-btn .material-symbols-outlined,
+    .movement-item__edit-btn .material-symbols-outlined {
       font-size: 20px;
     }
 
@@ -415,6 +418,10 @@
             '<div class="movement-item__trailing">' +
               '<span class="movement-item__amount movement-item__amount--' + (isEntrata ? 'entrata' : 'uscita') + '">' +
                 segno + ' ' + formatEuro(m.importo) + '</span>' +
+              '<button class="movement-item__edit-btn" data-edit="' + m.id + '" ' +
+                'aria-label="Modifica movimento ' + escHtml(m.categoria) + ' del ' + dataFmt + '">' +
+                '<span class="material-symbols-outlined">edit</span>' +
+              '</button>' +
               '<button class="movement-item__delete-btn" data-id="' + m.id + '" ' +
                 'aria-label="Elimina movimento ' + escHtml(m.categoria) + ' del ' + dataFmt + '">' +
                 '<span class="material-symbols-outlined">delete</span>' +
@@ -424,6 +431,11 @@
       }).join('');
 
       list.addEventListener('click', function (e) {
+        var edit = e.target.closest('.movement-item__edit-btn');
+        if (edit) {
+          window.location.href = 'nuovo-movimento.html?movId=' + encodeURIComponent(edit.getAttribute('data-edit')) + '&back=dettaglio';
+          return;
+        }
         var btn = e.target.closest('.movement-item__delete-btn');
         if (!btn) return;
         if (!confirm('Eliminare questo movimento?')) return;

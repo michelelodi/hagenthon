@@ -63,6 +63,29 @@ test('getMovimenti filters by contoId and returns all when omitted', () => {
   assert.equal(S.getMovimenti().length, 2);
 });
 
+test('updateMovimento modifies fields and recomputes saldo', () => {
+  const c = S.createConto({ nome: 'C', saldoIniziale: 100 });
+  const m = S.createMovimento({ contoId: c.id, tipo: 'uscita', importo: 30, data: '2026-09-01', categoria: 'Spesa' });
+  assert.equal(S.getConto(c.id).saldo, 70);
+  // Cambia importo 30 → 10 e categoria
+  const up = S.updateMovimento(m.id, { importo: 10, categoria: 'Casa', descrizione: 'Affitto' });
+  assert.equal(up.importo, 10);
+  assert.equal(up.categoria, 'Casa');
+  assert.equal(up.descrizione, 'Affitto');
+  assert.equal(S.getConto(c.id).saldo, 90);
+  // Cambia tipo uscita → entrata
+  S.updateMovimento(m.id, { tipo: 'entrata' });
+  assert.equal(S.getConto(c.id).saldo, 110);
+});
+
+test('updateMovimento importo is coerced positive; unknown id returns null', () => {
+  const c = S.createConto({ nome: 'C', saldoIniziale: 0 });
+  const m = S.createMovimento({ contoId: c.id, tipo: 'uscita', importo: 5, data: '2026-09-01', categoria: 'Altro' });
+  const up = S.updateMovimento(m.id, { importo: -42 });
+  assert.equal(up.importo, 42);
+  assert.equal(S.updateMovimento('nope', { importo: 1 }), null);
+});
+
 test('deleteMovimento removes it and restores saldo', () => {
   const c = S.createConto({ nome: 'C', saldoIniziale: 100 });
   const m = S.createMovimento({ contoId: c.id, tipo: 'uscita', importo: 40, data: '2026-09-01', categoria: 'Spesa' });
